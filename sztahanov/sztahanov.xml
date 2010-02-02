@@ -16,7 +16,7 @@
   <Content type="html">
 		<![CDATA[
 
-<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/prototype/1.6.0.2/prototype.js"></script>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/prototype/1.6.1.0/prototype.js"></script>
 <script tpe="text/javascript" src="http://gadget.virgosystems.hu/~mrc/sztahanov/sztahanov.js"></script>
 <link href="http://gadget.virgosystems.hu/~mrc/sztahanov/sztahanov.css" media="screen" rel="stylesheet" type="text/css" />
 
