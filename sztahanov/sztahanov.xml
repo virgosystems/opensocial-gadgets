@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+	<ModulePrefs title="Sztahanov"
+		title_url="http://gadget.virgosystems.hu/~mrc/sztahanov/sztahanov.html"
+		author="Salomváry Márton"
+		author_email="salomvary.marton@virgo.hu"
+		thumbnail="http://gadget.virgosystems.hu/~mrc/sztahanov/sztahanov_thumbnail.png"
+		screenshot="http://gadget.virgosystems.hu/~mrc/sztahanov/sztahanov_screenshot.png"
+		description="Mutasd meg a világnak, mekkkora workaholic vagy! (ha erre büszke vagy;)">
+		<Require feature="opensocial-0.8" />
+		<Require feature="dynamic-height"/>
+		<Require feature="views"/>
+		<Require feature="settitle"/>
+		<Icon>http://gadget.virgosystems.hu/~mrc/sztahanov/sztahanov_icon.png</Icon>
+	</ModulePrefs>
+  <Content type="html">
+		<![CDATA[
+
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/prototype/1.6.0.2/prototype.js"></script>
+<script tpe="text/javascript" src="http://gadget.virgosystems.hu/~mrc/sztahanov/sztahanov.js"></script>
+<link href="http://gadget.virgosystems.hu/~mrc/sztahanov/sztahanov.css" media="screen" rel="stylesheet" type="text/css" />
+
+<div class="sztahanov">
+	<div class="inner">
+		<div class="left">
+			<form id="logWork" onsubmit="return sztahanov.logWork()" style="display:none">
+				<fieldset>
+					<legend>Blokkolóóra</legend>
+					<p>
+						<label>Eddig ennyit lapátoltál:</label><strong id="sum" class="sum"></strong>
+					</p>
+					<p>
+						<label>Ma ennyit:</label>
+						<input type="text" size="2" id="hours"/> órát
+						<button type="submit" id="saveHours">Mehet</button>
+					</p>
+					<p class="goto_canvas">
+						<a href="#" onclick="return sztahanov.canvas()">Nagyít &raquo;</a>
+					</p>
+				</fieldset>
+			</form>
+			<form id="summary" style="display: none">
+				<fieldset>
+					<legend>Oklevél</legend>
+					<p>
+						<strong id="name"> </strong> eddig <strong id="sum2" class="sum"> </strong> órát lapátolt (te pedig <em id="sum_viewer" class="sum"></em>)
+					</p>
+					<p class="goto_canvas">
+						<a href="#" onclick="return sztahanov.canvas()">Nagyít &raquo;</a>
+					</p>
+				</fieldset>
+			</form>
+		</div>
+		<div class="right">
+			<div id="friend_pager" style="display:none">
+				<div>
+					<a href="#" id="friends_prev" onclick="return sztahanov.prevFriends()" style="display:none">&laquo;Előző</a>
+					<em id="current_page"></em>
+					<a href="#" id="friends_next" onclick="return sztahanov.nextFriends()" style="display:none">Következő&raquo;</a>
+				</div>
+				<div>
+					<em id="friends_count"></em>
+				</div>
+				<form id="userFilter">
+					<input type="checkbox" onclick="sztahanov.filterChange()" id="filter"/>				
+					<label for="filter">Csak a sztahanovisták</label>
+				</form>
+			</div>
+			<ul id="friends">
+			</ul>
+		</div>
+		<p class="copyright">&copy; Virgo MGTSZ</p>
+	</div>
+</div>
+<p class="error" style="display:none" id="error"></p>
+]]></Content>
+</Module>
+

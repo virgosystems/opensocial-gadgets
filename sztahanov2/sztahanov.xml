@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+	<ModulePrefs title="Sztahanov v2"
+		author="Gipsz Jakab"
+		author_email="noreply@iwiw.hu">
+		<Require feature="opensocial-0.8" />
+	</ModulePrefs>
+  	<Content type="html">
+	<![CDATA[
+
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/prototype/1.6.0.2/prototype.js"></script>
+
+<script tpe="text/javascript">
+var sztahanov = function() {
+	var hours = 0;
+
+	var logWork = function (event) {
+		Event.stop(event);
+		var hoursLogged = + $F('hours');
+		if(hoursLogged > 0) {
+			$('hours').value = '';
+			hours += hoursLogged;
+			$('sum').update(hours + ' órát');
+
+			var req = opensocial.newDataRequest();
+			req.add(req.newUpdatePersonAppDataRequest("VIEWER", 'workHours', {hours:hours}));
+			req.send();
+		}
+	}
+
+	var load = function(data) {
+		var viewer = data.get('viewer').getData();
+
+		var sztahanovData = data.get('viewerSztahanovData').getData();		
+		if(sztahanovData[viewer.getId()]) {
+			var workHours = gadgets.json.parse(gadgets.util.unescapeString(sztahanovData[viewer.getId()]['workHours']));	
+			if(workHours.hours) {
+				hours = workHours.hours;
+				$('sum').update(hours + ' órát');
+			}
+		}
+	}
+
+	return {
+		init: function() {
+			$('logWork').observe('submit',logWork);
+
+			var viewer = opensocial.newIdSpec({ "userId" : "VIEWER" });
+			var req = opensocial.newDataRequest();
+			req.add(req.newFetchPersonRequest(opensocial.IdSpec.PersonId.VIEWER), 'viewer');
+			req.add(req.newFetchPersonAppDataRequest(viewer, 'workHours'), 'viewerSztahanovData');
+			req.send(load);
+		}
+
+	}
+}();
+gadgets.util.registerOnLoadHandler(sztahanov.init);
+</script>
+<form id="logWork">
+	<p>
+		<label>Eddig ennyit lapátoltál:</label>
+		<strong id="sum" class="sum">semennyit</strong>
+	</p>
+	<p>
+		<label>Ma ennyit:</label>
+		<input type="text" size="2" id="hours"/> órát
+		<button type="submit" id="saveHours">Mehet</button>
+	</p>
+</form>
+	]]>
+	</Content>
+</Module>
+

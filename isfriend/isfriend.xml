@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+	<ModulePrefs title="Ismerősöm vagy?"
+		author="Gipsz Jakab"
+		author_email="salomvary.marton@virgo.hu">
+		<Require feature="opensocial-0.8" />
+	</ModulePrefs>
+  <Content type="html">
+		<![CDATA[
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/prototype/1.6.0.3/prototype.js"></script>
+
+<script type="text/javascript">
+var isfriend = function() {
+	var loadOwner = function(data) {		
+		var owner = data.get('owner').getData();
+
+		if(owner.isViewer()) {
+			$('target').update('Saját magam');
+		} else {
+			var params = {};
+			params[opensocial.DataRequest.PeopleRequestFields.FILTER] = 'id';
+			params[opensocial.DataRequest.PeopleRequestFields.FILTER_OPTIONS] = {
+				filterOp: 'equals',
+				filterValue: owner.getId()
+			};
+
+			var req = opensocial.newDataRequest();
+			req.add(req.newFetchPeopleRequest(opensocial.newIdSpec({ "userId" : "VIEWER", "groupId" : "FRIENDS" }), params), 'viewerFriends');
+			req.send(loadFriends);
+		}
+	}
+
+	var loadFriends = function(data) {
+		var friends = data.get('viewerFriends').getData();
+		if(friends && friends.size() == 1) {
+			$('target').update('Ismerős');
+		} else if(friends && friends.size() == 0){
+			$('target').update('Nem ismerős');
+		} else {
+			$('target').update('Hiba!');
+		}
+	}
+
+	return {
+		init: function() {
+			var req = opensocial.newDataRequest();
+			req.add(req.newFetchPersonRequest('OWNER'), 'owner');
+			req.send(loadOwner);
+		}
+	}
+}();
+gadgets.util.registerOnLoadHandler(isfriend.init);
+</script>
+<strong id="target">
+	Betöltés...
+</strong>
+]]></Content>
+</Module>
+

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+  <ModulePrefs title="views test" 
+		author="Gipsz Jakab"
+		author_email="noreply@iwiw.hu">
+		<Require feature="opensocial-0.8" />
+		<Require feature="views" />
+  </ModulePrefs>
+  <Content type="html" view="canvas" quirks="false">
+	  <![CDATA[	  
+		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/prototype/1.6.0.2/prototype.js"></script>
+
+	  <script type="text/javascript">
+		  	gadgets.util.registerOnLoadHandler(function() {
+			document.getElementById('view').innerHTML = gadgets.views.getCurrentView().getName();			
+			$('params').update(Object.toJSON(gadgets.views.getParams()));
+		  });
+			function profile(){
+				gadgets.views.requestNavigateTo(gadgets.views.getSupportedViews()["profile"],{
+					foo: 'bar',
+					baz: 1234
+				});
+			}
+	  </script>
+	  <p>Ez itt a canvas nézet - standards complicance mode</p>	  
+	  <p>gadgets.views.getCurrentView().getName(): <em id="view"></em></p>
+		<p>gadgets.views.getParams(): <em id="params"></em></p>
+		<a href="#" onclick="profile()">Menjünk a profilra</a>
+    ]]>
+  </Content>
+  <Content type="html" view="profile">
+	 <![CDATA[
+		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/prototype/1.6.0.2/prototype.js"></script>
+	  <script type="text/javascript">
+		  	gadgets.util.registerOnLoadHandler(function() {
+		  	document.getElementById('view').innerHTML = gadgets.views.getCurrentView().getName();
+			$('params').update(Object.toJSON(gadgets.views.getParams()));
+		  });
+			function canvas(){
+				gadgets.views.requestNavigateTo(gadgets.views.getSupportedViews()["canvas"],{
+					foo: 'bar',
+					baz: 1234,
+					url: 'http://foo.com?bar=5+5&baz=bar'
+				});
+			}
+	  </script>
+	 <p>Ez itt a profile nézet</p>
+	 <p>gadgets.views.getCurrentView().getName(): <em id="view"></em></p>
+		<p>gadgets.views.getParams(): <em id="params"></em></p>
+		<a href="#" onclick="canvas()">Menjünk a canvasra</a>
+    ]]>
+  </Content>
+  <Content type="html" view="preview">
+	 <![CDATA[
+	  <script type="text/javascript">
+		  	gadgets.util.registerOnLoadHandler(function() {
+		  	document.getElementById('view').innerHTML = gadgets.views.getCurrentView().getName();
+		  });
+	  </script>
+	 <p>Ez itt a preview nézet</p>
+	 <p>gadgets.views.getCurrentView().getName(): <em id="view"></em></p>
+		<p>gadgets.views.getParams(): <em id="params"></em></p>
+    ]]>
+  </Content>
+</Module>
+

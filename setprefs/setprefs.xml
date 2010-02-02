@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+  <ModulePrefs title="setprefs test" 
+		author="Gipsz Jakab"
+		author_email="noreply@iwiw.hu">
+		<Require feature="opensocial-0.8" />
+		<Require feature="setprefs" />
+  </ModulePrefs>
+  <Content type="html">
+	  <![CDATA[	  
+		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/prototype/1.6.0.2/prototype.js"></script>
+
+	  <script type="text/javascript">
+			var setprefs = function() {
+				var prefs;
+				return {
+					init: function() {
+						prefs = new gadgets.Prefs();
+						document.forms[0]['prefvalue'].value = prefs.getString('prefvalue');
+					},
+					save: function() {
+						prefs.set('prefvalue',document.forms[0]['prefvalue'].value);
+						return false;
+					}
+				};
+			}();
+			gadgets.util.registerOnLoadHandler(setprefs.init);
+	  </script>
+	  <form onsubmit="return setprefs.save()">
+	  		<input type="text" value="" name="prefvalue"/>
+			<button type="submit">ment</button>
+	  </form>
+    ]]>
+  </Content>
+</Module>
+

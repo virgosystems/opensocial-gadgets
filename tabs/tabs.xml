@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+  <ModulePrefs title="tabs test"
+		author="Gipsz Jakab"
+		author_email="noreply@iwiw.hu">
+		<Require feature="opensocial-0.8" />
+		<Require feature="tabs" />
+  </ModulePrefs>
+  <Content type="html">
+	 <![CDATA[
+		<!--  -->
+		<link href="http://portal.iwiw:8080/common/css/gadgets/tabs.css" media="screen" rel="stylesheet" type="text/css" />
+		<script type="text/javascript">
+			var tabs = function() {
+				var tabset;
+				return {
+					init: function() {
+						tabset = new gadgets.TabSet(null,null,document.getElementById('tabs'));
+						tabset.addTab('Első tabfül',{contentContainer:document.getElementById('tab1')});
+						tabset.addTab('Második tabfül',{contentContainer:document.getElementById('tab2')});
+					}
+				}
+			}();
+			gadgets.util.registerOnLoadHandler(tabs.init);
+		</script>
+
+		<div id="tabs">
+			<div id="tab1">
+			 Ez itt az első tabfül tartalma.....
+			</div>
+			<div id="tab2">
+			 Ez itt az második tabfül tartalma.....
+			</div>
+		</div>
+    ]]>
+  </Content>
+</Module>
+

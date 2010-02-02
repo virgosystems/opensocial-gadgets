@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+  <ModulePrefs title="Doctype!" 
+		author="Gipsz Jakab"
+		author_email="noreply@iwiw.hu">
+  </ModulePrefs>
+  <Content type="html">
+	  <![CDATA[
+	  <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+	  <html xmlns="http://www.w3.org/1999/xhtml">
+		  <head>
+			  <title>Hello</title>
+			  <meta content="IE=EmulateIE7" http-equiv="X-UA-Compatible"/>
+		  </head>
+		  <body>
+			  Hello world 1!
+				<p><strong id="mode"></strong></p>
+				<p>Ha a kek es a piros resz nem egyforma szeles, quirks mode-ban vagyunk:</p>
+				<div style="width:100px; height: 10px; background: red;"></div>
+				<div style="width:100px; height: 10px; background: blue; border-right: 50px solid green;"></div>
+			  <script>
+			  	(function(){
+					var mode=document.compatMode,m;
+					if(mode){
+						if(mode=='BackCompat') 
+							m='quirks';
+						else if(mode=='CSS1Compat')
+							m='Standards Compliance';
+						else m='Almost Standards Compliance';
+						if(document.documentMode) {
+							m += ' (engine='+document.documentMode+')';
+						}
+					} else {
+						m = 'Unknown (probably Standards Compiance)';
+					}
+					document.getElementById('mode').innerHTML = 'The document is being rendered in '+m+' mode.';
+				})();
+				</script>
+		  </body>
+	  </html>
+    ]]>
+  </Content>
+</Module>

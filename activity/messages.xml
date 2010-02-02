@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<messagebundle>
+  	<msg name="hello_world"> 
+		Hello World. Árvíztűrő tükörfúrógép.
+  	</msg> 
+	<msg name="html_test">
+		<![CDATA[
+		html test:
+		<a href="http://virgo.hu">virgo.hu</a>
+		br:<br/>
+		<a href="http://iwiw.hu">iwiw.hu</a>
+		<b>bold</b>
+		<i>italic</i>
+		<div style="color:red">styled div</div>
+		<button>button</button>
+		foo: ${foo} 
+		baz: ${baz} 
+		]]>
+	</msg>
+	<msg name="activity1">
+	 Activity1 template. Subject: ${Subject} foo: ${foo} baz: ${baz} 
+	</msg>
+	<msg name="activity1:Subject">
+	 Activity1 Subject template. 
+	 Subject: ${Subject}
+	 Subject.DisplayName: ${Subject.DisplayName}
+	 Subject.List: ${Subject.List}
+	 Subject.Count: ${Subject.Count}
+	 foo: ${foo} 
+	 baz: ${baz} 
+	</msg>
+	<msg name="activity1:foo">
+	 Activity1 foo template.
+	 Subject: ${Subject}
+	 Subject.DisplayName: ${Subject.DisplayName}
+	 foo.Count: ${foo.Count} 
+	 foo.List: ${foo.List}
+	 baz: ${baz} 
+	</msg>
+	<msg name="activity2">
+	 Activity2 template. Subject: ${Subject} foo: ${foo} baz: ${baz}
+	</msg>
+</messagebundle>

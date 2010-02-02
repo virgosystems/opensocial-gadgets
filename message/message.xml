@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+  <ModulePrefs title="message test" 
+		author="Gipsz Jakab"
+		author_email="noreply@iwiw.hu">
+		<Require feature="opensocial-0.8" />
+		<Require feature="dynamic-height"/>
+  </ModulePrefs>
+  <Content type="html">
+	 <![CDATA[
+		<!--  -->
+		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/prototype/1.6.0.2/prototype.js"></script>
+		<script type="text/javascript">
+			var message = function() {
+				function submit(event) {
+					Event.stop(event);
+					var d = $('f').serialize(true);
+
+					var options = {};
+
+					['type','title', 'titleId', 'bodyId'].each(function(field){
+						if(d[field] != 'undefined') {
+							options[field] = d[field];
+						}
+					})
+
+					var recipients;
+					if((d['recipients-ownerfriends'] && d['recipients-ownerfriends'].length>0) || (d['recipients-viewerfriends'] && d['recipients-viewerfriends'].length>0)){
+						recipients = (d['recipients-ownerfriends'] || []).concat(d['recipients-viewerfriends'] || []);
+					} else {
+						recipients = d.recipients;
+					}
+
+					for(var i=1; i<= parseInt(d.num); i++) {
+						var m = opensocial.newMessage(d.body + " (" + i + ".)",options);
+						opensocial.requestSendMessage(recipients, m, response);
+					}
+				}
+
+		
+				function response(response) {
+					$('response').innerHTML += (response.hadError() ? response.getErrorMessage() : 'OK') + "\n";
+					gadgets.window.adjustHeight();
+				}
+
+				function cls() {
+					$('response').update('');
+					gadgets.window.adjustHeight();
+				}
+
+
+				function load(data){
+					fillselect('recipients-viewerfriends', data.get('viewerFriends').getData());
+					fillselect('recipients-ownerfriends', data.get('ownerFriends').getData());
+				}
+
+				function fillselect(id, data) {
+					var list = [];
+					data.each(function(person){
+						list.push(
+							'<option value="'+person.getId()+'">'+
+							person.getDisplayName()+'</option>');
+						
+					});
+					$(id).update(list.join(''));
+				}
+
+				return {
+					init: function() {
+						$('f').observe('submit', submit);
+						$('cls').observe('click',cls);
+						var req = opensocial.newDataRequest();
+						var params= {};
+						params[opensocial.DataRequest.PeopleRequestFields.MAX]=50;
+						req.add(req.newFetchPeopleRequest(opensocial.newIdSpec({ "userId" : "OWNER", "groupId" : "FRIENDS" }), params), 'ownerFriends');
+						req.add(req.newFetchPeopleRequest(opensocial.newIdSpec({ "userId" : "VIEWER", "groupId" : "FRIENDS" }), params), 'viewerFriends');
+						req.send(load);
+					}
+				}
+			}();
+			gadgets.util.registerOnLoadHandler(message.init);
+		</script>
+		<form id="f">
+			<fieldset>
+				<p>
+					<label>Üzenetek száma:</label><input type="text" name="num" value="1"/>
+				</p>
+				<p>
+					<label>Recipient(s):</label><input type="text" name="recipients" value="VIEWER"/>
+				</p>
+				<p>
+					<label>Recipients ownerfriends:</label>
+					<select multiple="multiple" size="5" name="recipients-ownerfriends" id="recipients-ownerfriends">
+					</select>
+				</p>
+				<p>
+					<label>Recipients viewerfriends:</label>
+					<select multiple="multiple" size="5" name="recipients-viewerfriends" id="recipients-viewerfriends">
+					</select>
+				</p>
+				<p>
+					<label>Body:</label><br/>
+					<textarea name="body">hello world</textarea>
+				</p>
+				<p>
+					<label>Type:</label>
+					<select name="type">
+						<option value="undefined">undefined</option>
+						<option value="notification" selected="selected">notification</option>
+						<option value="email">email</option>
+						<option value="privateMessage">privateMessage</option>
+						<option value="publicMessage">publicMessage</option>
+					</select>
+				</p>
+				<p>
+					<label>title</label><input type="text" name="title" value="undefined"/>
+				</p>
+				<p>
+					<label>titleId</label><input type="text" name="titleId" value="undefined"/>
+				</p>
+				<p>
+					<label>bodyId</label><input type="text" name="bodyId" value="undefined"/>
+				</p>
+				<input type="submit"/>
+			</fieldset>
+			<fieldset>
+				<legend>Válasz:</legend>
+				<pre id="response"></pre>
+				<button type="button" id="cls">töröl</button>
+			</fieldset>
+		</form>		
+      
+    ]]>
+  </Content>
+</Module>
+

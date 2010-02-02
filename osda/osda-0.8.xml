@@ -1,0 +1,574 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Module>
+  <!--
+   Copyright 2008 Google Inc.
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+       http://www.apache.org/licenses/LICENSE-2.0
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+  -->
+  <ModulePrefs directory_title="OpenSocial Dev App (0.8)"
+               title_url="http://osda.appspot.com"
+               title="OpenSocial Dev App (0.8)"
+               screenshot="http://osda.appspot.com/img/gadget-screenshot.png"
+               thumbnail="http://osda.appspot.com/img/gadget-thumbnail.png"
+               description="This gadget provides the ability to write and save JavaScript code samples to execute against OpenSocial containers.  This helps rapidly test sample OpenSocial code."
+               author_email="opensocial.coderunner@gmail.com"
+               author="Google Inc."
+               author_affiliation="Google Inc."
+               author_location="Mountain View, CA, USA"
+               scaling="true"
+               scrolling="false"
+               singleton="false">
+    <Require feature="opensocial-0.8" />
+    <Require feature="dynamic-height" />
+    <Require feature="views" />
+    <Require feature="tabs" />
+    <Optional feature="flash" />
+    <Optional feature="setprefs" />
+  </ModulePrefs>
+<Content type="html" view="profile,home,canvas,default">
+  <![CDATA[
+    <style type="text/css">
+#wrap{width:98%;margin:0 1%;padding:5px 0;}
+a,.tablib_selected{color:#00d!important;}
+.tablib_emptyTab,.tablib_unselected,.tablib_spacerTab{border-bottom:1px solid #ccc;}
+.tablib_selected{border-color:#ccc;background:#eee;border-right:1px solid #999;}
+.controls{font:14px Arial,sans;padding:0;margin:0;}
+.toolbar{background:#eee;border:1px solid #ccc;border-bottom:1px solid #999;border-right:1px solid #999;border-top-width:0;padding:2px;}
+.toolbar table{width:99%;border-collapse:collapse;margin:0;}
+.subtoolbar{background:#ddd;padding:3px;border:1px solid #ccc;border-top:1px solid #eee;border-bottom:1px solid #999;border-right:1px solid #999;}
+.controls a,.subtoolbar a,.subtoolbar span,.subtoolbar code,.subtoolbar span code a,#code_controls .controlcell a{font:14px Arial,sans!important;cursor:pointer;height:16px;}
+.subtoolbar span{color:#111;}
+#dom_handle{margin:10px 0;}
+.toolbar select{border:1px solid #ccc;font:11px Arial;padding:2px;width:15em;}
+.toolbar a img,.subtoolbar a img{height:16px;width:16px;padding:0;margin:0;vertical-align:middle;}
+#code_controls table{width:100%;}
+#code_controls .samplescell{width:82%;padding-top:2px;}
+#code_controls .controlcell{width:9%;text-align:right;vertical-align:top;padding-top:2px;}
+#button_code_down{background:url('http://osda.appspot.com/img/arrow_down.png') no-repeat left center;padding-left:20px;}
+#button_code_up{background:url('http://osda.appspot.com/img/arrow_up.png') no-repeat left center;padding-left:20px;}
+#samplesbox{width:100%;background:#fff;border:1px dashed #999;padding:2px;}
+.overlay-shadow{background:#333;}
+.overlay-content{border:4px solid #A7C7FB;background:#F1F6FE;left:-3px;top:-3px;padding:5px;}
+.dafos-notice{font:11px Arial;color:#999;text-align:center;}
+.dafos-notice a{color:#55d!important;}
+.dafos-button{margin-left:8px;text-decoration:none;}
+.dafos-button img{vertical-align:sub;border:0;}
+.dafos-tools-cachetable,.dafos-tools-cachetable button,.dafos-tools-cachetable input{width:100%;}
+.dafos-tools-cachetable td.inputcell{width:80%;}
+.dom_handle_label{font:13px Courier New;background:#eee;color:#999;}
+p,div,span{font:12px Arial;}
+code,var,.code,#output{font:13px Courier New;}
+h1,h2,h3,h4{color:#000;font-weight:normal;font-family:Arial;margin:15px 0 5px 0;padding:0;}
+h1{font-size:22px;border-bottom:1px solid #ccc;}
+h2{font-size:18px;}
+h3,h3 *{font-size:16px;}
+code{color:#090;}
+var{color:#00d;}
+.code{font-weight:bold;background:#fffeee;color:#000;padding:5px;border:1px solid #999;}
+p,.code{margin:2px,0;}
+.dafos-message,.dafos-error{text-align:center;padding:2px;margin-bottom:4px;background:#36b;color:#fff;}
+.dafos-error{background:#d00;}
+.notice{width:70%;padding:4px;background:#fffeee;border:1px solid #eeeddd;margin:5px auto;}
+.hidden{display:none;}
+#output{background:#333;color:#fff;padding:5px;margin:5px 0;}
+.status{color:#999;}
+#link_container{background:#e0ecff;font:14px Arial;margin:10px;padding:5px;}
+textarea{width:100%;height:auto;}
+#code_exec{height:400px;}
+.console div{font:9px Courier;color:#fff;background:#000;padding:2px;}
+.console .odd{background:#111;}
+.InputDisplay{width:300px;position:absolute;top:150px;left:50%;margin-left:-150px;background:#333;}
+.InputDisplay table{width:300px;position:relative;border:4px solid #A7C7FB;background:#F1F6FE;left:-3px;top:-3px;font-weight:bold!important;}
+.InputDisplay input{width:95%;}
+.entries-list{margin:0;padding:0;}
+.entries-list .entry{margin:0;padding:20px 0 0 0;list-style-type:none;font:12px Arial;}
+.entries-list .title{display:block;font:18px Arial;padding:0 0 2px 0;margin:0 0 4px 0;border-bottom:1px solid #ccc;}
+.entries-list .title a{text-decoration:none;}
+.entries-list .subtitle{font:13px Arial;font-style:italic;color:#666;}
+.entries-list .summary{margin:10px 0;}
+.entries-list .code{margin:0;background:#fffeee;border:1px solid #ccc;font:12px Courier New;overflow:auto;width:100%;height:200px;}
+#newstab-toc{width:40%;float:right;margin:10px 0 0 0;border-bottom:10px solid #fff;border-left:10px solid #fff;}
+#newstab-toc-table thead th{font:16px Arial;font-weight:bold;text-align:left;}
+#newstab-toc-table .subtitle{font:10px Arial;font-style:italic;color:#666;}
+table.tabular tr.odd{background:#eee;}
+table.tabular tr.even{background:#fafafa;}
+table.tabular{width:100%;margin:0;padding:0;font:12px Arial;border-bottom:1px solid #999;border-top:1px solid #999;}
+table.tabular tbody,table.tabular thead{width:100%;}
+table.tabular tbody th{font-weight:bold;text-align:right;vertical-align:top;padding:5px;border-bottom:1px solid #ddd;}
+table.tabular tbody td{padding:5px;border-bottom:1px solid #ddd;}
+table.tabular thead th{background:#ddd;text-align:center;border-bottom:1px solid #999;padding:5px;}
+#exporttab table.tabular tbody th{width:100px;}
+#exporttab table .textinput{width:100%;padding:4px;border:1px solid #999;font:12px Arial;}
+#exporttab table td.important .textinput{background-color:#fffeee;}
+#exporttab table.preload tbody td{text-align:center;}
+#exporttab table.preload input{width:100%;}
+#exporttab table.features tbody th{width:25%;}
+#exporttab textarea.code{height:200px;}
+#exporttab-overlay-textbox{display:block;overflow:auto;font-weight:bold;background:#fff;padding:5px;border:1px solid #999;width:98%;margin:0 auto;}
+#exporttab-view-tabs .tabular{border-top:0;}
+#exporttab-view-tabs{position:relative;}
+#exporttab-view-tabs textarea.view_html,#exporttab-view-tabs .view_html_background{position:absolute;width:98%;left:5px;top:5px;height:490px;margin:0;border:0;overflow:auto;}
+#exporttab-view-tabs .view_html_wrap .highlight,#exporttab-view-tabs textarea.view_html,#exporttab-view-tabs .view_html_background{font:12px Courier New;}
+#exporttab-view-tabs textarea.view_html{background:transparent;}
+#exporttab-view-tabs .view_html_wrap{position:relative;height:500px;background:#fffeeb;border:1px solid #ccc;}
+#exporttab-view-tabs .view_html_background{color:#fffeeb;overflow:hidden;}
+#exporttab-view-tabs .view_html_wrap .highlight{background:#FFF4AD;color:#FFF4AD;display:block;margin-bottom:-1em;}
+#exporttab-clipboard{width:0;height:0;position:absolute;overflow:hidden;right:0;bottom:0;}
+#exporttab-bottom-toolbar{background:#EEE;border-color:#CCC #999999 #999 #CCCCCC;border-style:solid;border-width:1px;padding:2px 5px;text-align:right;margin:10px 0;vertical-align:top;}
+#helptab a.external{color:#0d0!important;}
+#helptab img.center{display:block;margin:10px auto;}
+#helptab img.left{float:left;margin:0 10px 10px 0;}
+#helptab img.right{float:right;margin:0 0 10px 10px;}
+#helptab ol{margin:10px 12%;padding:0;}
+#helptab ol li{margin:5px 0;color:#c00;font-weight:bold;}
+#helptab ol li span{padding:0 0 0 2px;color:#000;font-weight:normal;}
+#helptab .reference{color:#c00;font-weight:bold;}
+#helptab .gs-nav a{text-decoration:none;border:1px solid #ccc;-moz-border-radius:4px;padding:4px;margin:1px 0;background:#fafafa;color:#666!important;}
+#helptab .gs-nav{width:100%;table-layout:fixed;margin:0 0 10px 0;padding:0;}
+#helptab .gs-nav td{padding:0 3px 3px 3px;font-size:12px;}
+#helptab .gs-nav.bottom{margin-top:20px;}
+#helptab .apilist{margin:0 12%;}
+#helptab .apilist th{vertical-align:top;text-align:left;padding:0 20px 0 0;font-size:12px;}
+#helptab .apilist td{padding:0 0 5px 0;font-size:12px;}
+#statetab .even{background:#fafafa;}
+#statetab .odd{background:#eee;}
+#statetab .person{width:100%;table-layout:fixed;}
+#statetab .person td{vertical-align:top;}
+#statetab .person td.thumbnail{width:64px;vertical-align:top;}
+#statetab .person td.thumbnail img{width:64px;}
+#statetab .person .persondisplayname{font:16px Arial;margin:0;padding:0;}
+#statetab .person .personid{font:12px Arial;color:#666;margin:0;padding:0;}
+#statetab .fieldstable{width:100%;border-collapse:collapse;table-layout:fixed;}
+#statetab .fieldstable td{font:12px Arial;padding-top:2px;padding-bottom:2px;border-bottom:1px dotted #ccc;vertical-align:top;}
+#statetab .fieldstable td.value{width:40%;font-weight:bold;color:#090;overflow:auto;}
+#statetab .fieldstable td pre{font:12px Arial;margin:0;padding:0;}
+#statetab .fieldstable tr.headerrow td pre{font-weight:bold;}
+.profile #code_exec{height:200px;}
+    </style>
+    <script type="text/javascript">
+var dafos={};dafos.bind=function(D,E){var C=[];for(var B=2,A=arguments.length;B<A;B++){C.push(arguments[B])}return function(){var G=C.slice();for(var H=0,F=arguments.length;H<F;H++){G.push(arguments[H])}D.apply(E,G)}};dafos.timeToPrettyString=function(B){if(isNaN(B)){return"an indeterminate amount of time ago"}time=(new Date().getTime()-B)/1000;if(time<60){return"less than a minute ago"}else{if(time<120){return"about a minute ago"}else{if(time<3600){var A=Math.round(time/60);return"about "+A+" minutes ago"}else{if(time<7200){return"about an hour ago"}else{if(time<86400){var A=Math.round(time/3600);return"about "+A+" hours ago"}else{if(time<172800){return"about a day ago"}else{if(time<2592000){var A=Math.round(time/86400);return"about "+A+" days ago"}else{if(time<5184000){return"about a month ago"}else{var A=Math.round(time/2592000);return"about "+A+" months ago"}}}}}}}}};dafos.monthToString=function(A){return["January","Febuary","March","April","May","June","July","August","September","October","November","December"][A-1]||""};var ark={};ark.bind=function(D,E){var C=[];for(var A=2,B;B=arguments[A];A++){C.push(B)}return function(){var F=C.slice();for(var G=0,H;H=arguments[G];G++){F.push(H)}D.apply(E,F)}};dafos.OpenSocial=function(){this.version="0.8";this.viewer={};this.owner={};this.peopledata={}};dafos.OpenSocial.prototype.getDataOr=function(C,A,B){return(C&&C.get(A)&&!C.get(A).hadError()&&C.get(A).getData())||B};dafos.OpenSocial.prototype.getOpenSocialData=function(B,C){var A=opensocial.newDataRequest();A.add(A.newFetchPersonAppDataRequest(opensocial.newIdSpec({userId:"OWNER"}),B),"peopledata");A.add(A.newFetchPersonRequest("OWNER"),"owner");A.add(A.newFetchPersonRequest("VIEWER"),"viewer");A.send(dafos.bind(this.closeGetOpenSocialData(C),this))};dafos.OpenSocial.prototype.closeGetOpenSocialData=function(A){return function(E){var B=null,D=null,C=null;this.viewer=this.getDataOr(E,"viewer",this.viewer);this.owner=this.getDataOr(E,"owner",this.owner);B=this.getDataOr(E,"peopledata",{});this.mergePersonAppData.apply(this,[B]);if(A&&typeof (A)=="function"){A()}}};dafos.OpenSocial.prototype.mergePersonAppData=function(A){for(personkey in A){if(A.hasOwnProperty(personkey)){this.peopledata[personkey]=this.peopledata[personkey]||{};for(datakey in A[personkey]){if(A[personkey].hasOwnProperty(datakey)){this.peopledata[personkey][datakey]=A[personkey][datakey]}}}}};dafos.OpenSocial.prototype.viewerIsOwner=function(){var B=this.viewer.getId&&this.viewer.getId()||-1;var A=this.owner.getId&&this.owner.getId()||-2;return B==A};dafos.OpenSocial.prototype.setAppData=function(C,A,D){var B=opensocial.newDataRequest();C=gadgets.json.stringify(C);B.add(B.newUpdatePersonAppDataRequest("VIEWER",A,C),"updatedata");B.add(B.newFetchPersonAppDataRequest(opensocial.newIdSpec({userId:"OWNER"}),A,C),"peopledata");B.send(dafos.bind(this.closeSetAppData(D),this))};dafos.OpenSocial.prototype.closeSetAppData=function(A){return function(D){var B=null,C=null;B=this.getDataOr(D,"peopledata",{});this.mergePersonAppData.apply(this,[B]);if(A&&typeof (A)=="function"){A()}}};dafos.OpenSocial.prototype.getPersonData=function(A){return(A&&this.peopledata[A])||{}};dafos.OpenSocial.prototype.getViewerData=function(){return(this.viewer&&this.viewer.getId&&this.peopledata[this.viewer.getId()])||{}};dafos.OpenSocial.prototype.getOwnerData=function(){return(this.owner&&this.owner.getId&&this.peopledata[this.owner.getId()])||{}};ark.AggregateCallback=function(B,A){this.current_=0;this.total_=A||0;this.onfinished_=[];if(B){this.onfinished_.push(B)}};ark.AggregateCallback.prototype.checkIfFinished_=function(){if(this.current_>=this.total_){while(this.onfinished_.length>0){var A=this.onfinished_.shift();A()}}};ark.AggregateCallback.prototype.addOnFinishedListener=function(A){this.onfinished_.push(A);this.checkIfFinished_()};ark.AggregateCallback.prototype.getCallback=function(){var A=this;this.total_++;return function(){A.callback()}};ark.AggregateCallback.prototype.callback=function(){this.current_++;this.checkIfFinished_()};var quikos=function(){};quikos.id={};quikos.idspec={};quikos.id.VIEWER="VIEWER";quikos.id.OWNER="OWNER";quikos.idspec.VIEWER=opensocial.newIdSpec({userId:"VIEWER",groupId:"SELF"});quikos.idspec.OWNER=opensocial.newIdSpec({userId:"OWNER",groupId:"SELF"});quikos.idspec.VIEWER_FRIENDS=opensocial.newIdSpec({userId:"VIEWER",groupId:"FRIENDS"});quikos.idspec.OWNER_FRIENDS=opensocial.newIdSpec({userId:"OWNER",groupId:"FRIENDS"});quikos.idspec.personById=function(A){return opensocial.newIdSpec({userId:A,groupId:"SELF"})};quikos.idspec.friendsById=function(A){return opensocial.newIdSpec({userId:A,groupId:"FRIENDS"})};quikos.PeopleParams=function(){};quikos.PeopleParams.prototype.ensureProfileDetails_=function(){if(!this[opensocial.DataRequest.PeopleRequestFields.PROFILE_DETAILS]){this[opensocial.DataRequest.PeopleRequestFields.PROFILE_DETAILS]=[]}};quikos.PeopleParams.prototype.setFirst=function(A){this[opensocial.DataRequest.PeopleRequestFields.FIRST]=A;return this};quikos.PeopleParams.prototype.setMax=function(A){this[opensocial.DataRequest.PeopleRequestFields.MAX]=A;return this};quikos.PeopleParams.prototype.addFields=function(A){this.ensureProfileDetails_();if(typeof A=="string"){A=[A]}for(var B=0,C;C=A[B];B++){if(opensocial.Person.Field.hasOwnProperty(C)){this[opensocial.DataRequest.PeopleRequestFields.PROFILE_DETAILS].push(opensocial.Person.Field[C])}}return this};quikos.prototype.ensureDataRequest_=function(){if(!this.request_){this.tags_=[];this.errors_={};this.request_=opensocial.newDataRequest()}};quikos.prototype.closeHandleResponse_=function(B){var A=this;return function(F){var D={};for(var E=0,C;C=A.tags_[E];E++){var G=F.get(C);if(!G.hadError()){D[C]=G.getData()}else{D[C]=null;A.errors_[C]={error_message:G.getErrorMessage(),error_code:G.getErrorCode()}}}B(D,A)}};quikos.prototype.getErrorMessage=function(A){if(this.errors_[A]){return this.errors_[A].error_message}};quikos.prototype.getErrorCode=function(A){if(this.errors_[A]){return this.errors_[A].error_code}};quikos.prototype.getFullErrorMessage=function(A){if(this.errors_[A]){return"["+this.errors_[A].error_code+"] "+this.errors_[A].error_message}};quikos.prototype.hadError=function(A){return(this.errors_.hasOwnProperty(A))};quikos.prototype.startRequest=function(){this.ensureDataRequest_();return this};quikos.prototype.sendRequest=function(A){this.ensureDataRequest_();this.request_.send(this.closeHandleResponse_(A));return this};quikos.prototype.fetchPerson=function(D,A,C){this.ensureDataRequest_();var B=this.request_.newFetchPersonRequest(D,C);this.request_.add(B,A);this.tags_.push(A);return this};quikos.prototype.fetchPeople=function(B,A,D){this.ensureDataRequest_();var C=this.request_.newFetchPeopleRequest(B,D);this.request_.add(C,A);this.tags_.push(A);return this};quikos.prototype.fetchData=function(B,A,E,D){this.ensureDataRequest_();if(!E){E="*"}var C=this.request_.newFetchPersonAppDataRequest(B,E,D);this.request_.add(C,A);this.tags_.push(A);return this};quikos.prototype.setData=function(B,D,A){this.ensureDataRequest_();var C=this.request_.newUpdatePersonAppDataRequest(quikos.id.VIEWER,B,D);this.request_.add(C,A);this.tags_.push(A);return this};quikos.prototype.deleteData=function(B,A){this.ensureDataRequest_();var C=this.request_.newRemovePersonAppDataRequest(quikos.id.VIEWER,opt_key);this.request_.add(C);this.tags_.push(A);return this};var w23={e:function(E,A){var F=document.createElement(E),D=0,C=0,B=0;if(A){for(C in A){if(A.hasOwnProperty(C)){if(C!="style"){F[C]=A[C]}else{for(B in A[C]){if(A[C].hasOwnProperty(B)){F[C][B]=A[C][B]}}}}}}if(arguments.length>2){for(D=2;D<arguments.length;D++){if(typeof (arguments[D])=="string"){F.appendChild(w23.t(arguments[D]))}else{F.appendChild(arguments[D])}}}return F},t:function(A){return document.createTextNode(A)},append:function(B){if(arguments.length>1){for(var A=1;A<arguments.length;A++){if(typeof (arguments[A])=="string"){B.appendChild(w23.t(arguments[A]))}else{B.appendChild(arguments[A])}}}}};ark.InputDisplay=function(A){this.parent_=A;this.className_="InputDisplay"};ark.InputDisplay.prototype.setClass=function(A){this.className_=A};ark.InputDisplay.prototype.onOk=function(A){this.hide();A(this.input_.value)};ark.InputDisplay.prototype.onCancel=function(A){this.hide();A()};ark.InputDisplay.prototype.onKeyUp=function(C,B){B=B||window.event;var A=B.keyCode||B.which;if(A==13){this.onOk(C)}};ark.InputDisplay.prototype.show=function(F,C){this.box_=w23.e("div",{className:this.className_});var D=w23.t(F);this.input_=w23.e("input",{onkeyup:ark.bind(this.onKeyUp,this,C)});var A=w23.e("button",{onclick:ark.bind(this.onOk,this,C)},"Ok");var B=w23.e("button",{onclick:ark.bind(this.onCancel,this,C)},"Cancel");var E=w23.e("table",null,w23.e("tbody",null,w23.e("tr",null,w23.e("td",{colspan:3},D)),w23.e("tr",null,w23.e("td",null,this.input_),w23.e("td",null,A),w23.e("td",null,B))));w23.append(this.box_,E);w23.append(this.parent_,this.box_);this.input_.focus()};ark.InputDisplay.prototype.hide=function(){this.parent_.removeChild(this.box_);this.box_=null};dafos.AppEngine=function(){};dafos.AppEngine.prototype.saveSample=function(B,F,E,G){var D={};var C={dafos_sample_name:B,dafos_sample_text:F,viewer_name:E};D[gadgets.io.RequestParameters.AUTHORIZATION]=gadgets.io.AuthorizationType.SIGNED;D[gadgets.io.RequestParameters.CONTENT_TYPE]=gadgets.io.ContentType.JSON;D[gadgets.io.RequestParameters.METHOD]=gadgets.io.MethodType.POST;D[gadgets.io.RequestParameters.POST_DATA]=gadgets.io.encodeValues(C);var A="http://osda.appspot.com/gadgetapi/savesample";gadgets.io.makeRequest(A,dafos.bind(this.saveResponse,this,G),D)};dafos.AppEngine.prototype.deleteRecord=function(E,D){var C={};var B={};C[gadgets.io.RequestParameters.AUTHORIZATION]=gadgets.io.AuthorizationType.SIGNED;C[gadgets.io.RequestParameters.CONTENT_TYPE]=gadgets.io.ContentType.JSON;C[gadgets.io.RequestParameters.METHOD]=gadgets.io.MethodType.POST;C[gadgets.io.RequestParameters.POST_DATA]=gadgets.io.encodeValues(B);var A="http://osda.appspot.com/gadgetapi/deleterecord/"+E;gadgets.io.makeRequest(A,dafos.bind(this.saveResponse,this,D),C)};dafos.AppEngine.prototype.canSave=function(C){var B={};B[gadgets.io.RequestParameters.AUTHORIZATION]=gadgets.io.AuthorizationType.SIGNED;B[gadgets.io.RequestParameters.CONTENT_TYPE]=gadgets.io.ContentType.JSON;B[gadgets.io.RequestParameters.METHOD]=gadgets.io.MethodType.POST;B[gadgets.io.RequestParameters.POST_DATA]=gadgets.io.encodeValues({test:"test"});var A="http://osda.appspot.com/gadgetapi/cansave";gadgets.io.makeRequest(A,dafos.bind(this.saveResponse,this,C),B)};dafos.AppEngine.prototype.getOwnerSamples=function(C){var B={};B[gadgets.io.RequestParameters.AUTHORIZATION]=gadgets.io.AuthorizationType.SIGNED;B[gadgets.io.RequestParameters.CONTENT_TYPE]=gadgets.io.ContentType.JSON;B[gadgets.io.RequestParameters.METHOD]=gadgets.io.MethodType.POST;B[gadgets.io.RequestParameters.POST_DATA]=gadgets.io.encodeValues({test:"test"});var A="http://osda.appspot.com/gadgetapi/samples";gadgets.io.makeRequest(A,dafos.bind(this.saveResponse,this,C),B)};dafos.AppEngine.prototype.getSample=function(D,C){var B={};B[gadgets.io.RequestParameters.AUTHORIZATION]=gadgets.io.AuthorizationType.SIGNED;B[gadgets.io.RequestParameters.CONTENT_TYPE]=gadgets.io.ContentType.JSON;B[gadgets.io.RequestParameters.METHOD]=gadgets.io.MethodType.POST;B[gadgets.io.RequestParameters.POST_DATA]=gadgets.io.encodeValues({test:"test"});var A="http://osda.appspot.com/gadgetapi/sample/"+D;gadgets.io.makeRequest(A,dafos.bind(this.saveResponse,this,C),B)};dafos.AppEngine.prototype.saveXmlSpec=function(B,F,E,G){var D={};var C={dafos_xmlspec_name:B,dafos_xmlspec_text:F,viewer_name:E};D[gadgets.io.RequestParameters.AUTHORIZATION]=gadgets.io.AuthorizationType.SIGNED;D[gadgets.io.RequestParameters.CONTENT_TYPE]=gadgets.io.ContentType.JSON;D[gadgets.io.RequestParameters.METHOD]=gadgets.io.MethodType.POST;D[gadgets.io.RequestParameters.POST_DATA]=gadgets.io.encodeValues(C);var A="http://osda.appspot.com/gadgetapi/savexmlspec";gadgets.io.makeRequest(A,dafos.bind(this.saveResponse,this,G),D)};dafos.AppEngine.prototype.getOwnerXmlSpecs=function(C){var B={};B[gadgets.io.RequestParameters.AUTHORIZATION]=gadgets.io.AuthorizationType.SIGNED;B[gadgets.io.RequestParameters.CONTENT_TYPE]=gadgets.io.ContentType.JSON;B[gadgets.io.RequestParameters.METHOD]=gadgets.io.MethodType.POST;B[gadgets.io.RequestParameters.POST_DATA]=gadgets.io.encodeValues({test:"test"});var A="http://osda.appspot.com/gadgetapi/xmlspecs";gadgets.io.makeRequest(A,dafos.bind(this.saveResponse,this,C),B)};dafos.AppEngine.prototype.getXmlTemplate=function(C){var B={};B[gadgets.io.RequestParameters.CONTENT_TYPE]=gadgets.io.ContentType.TEXT;var A="http://osda.appspot.com/static/xmlspec-template.xml";gadgets.io.makeRequest(A,dafos.bind(this.saveResponse,this,C),B)};dafos.AppEngine.prototype.getXmlSpec=function(D,C){var B={};B[gadgets.io.RequestParameters.AUTHORIZATION]=gadgets.io.AuthorizationType.SIGNED;B[gadgets.io.RequestParameters.CONTENT_TYPE]=gadgets.io.ContentType.JSON;B[gadgets.io.RequestParameters.METHOD]=gadgets.io.MethodType.POST;B[gadgets.io.RequestParameters.POST_DATA]=gadgets.io.encodeValues({test:"test"});var A="http://osda.appspot.com/gadgetapi/xmlspec/"+D;gadgets.io.makeRequest(A,dafos.bind(this.saveResponse,this,C),B)};dafos.AppEngine.prototype.getGlobalSnippets=function(C){var B={};B[gadgets.io.RequestParameters.CONTENT_TYPE]=gadgets.io.ContentType.JSON;var A="http://osda.appspot.com/gadgetapi/globalsamples";gadgets.io.makeRequest(A,dafos.bind(this.saveResponse,this,C),B)};dafos.AppEngine.prototype.saveResponse=function(B,A){if(typeof B=="function"){if(A.data){B(A.data)}else{if(A.text){dafos.ui.setError("Server issue: "+A.text)}if(!A.errors){A.errors=["Unknown"]}B({error:A.errors[0]})}}};dafos.CodeTab=function(A,B){this.appengine=new dafos.AppEngine();this.gadgetui=B;this.codetabui=new dafos.CodeTabUI(A);this.samples={};this.gadgetui.showLoading("capabilities");dafos.initCallback.getCallback();this.appengine.canSave(dafos.bind(this.onCanSave,this));this.gadgetui.showLoading("samples");dafos.initCallback.getCallback();this.appengine.getOwnerSamples(dafos.bind(this.onSamplesLoaded,this));dafos.initCallback.addOnFinishedListener(dafos.bind(this.onLoaded,this))};dafos.CodeTab.prototype.onCanSave=function(A){this.gadgetui.hideLoading("capabilities");dafos.cansave=(A.status=="success");dafos.initCallback.callback()};dafos.CodeTab.prototype.onSamplesLoaded=function(B){this.gadgetui.hideLoading("samples");this.gadgetui.setMessage(B.message);if(B.status=="success"){for(var A=0;A<B.payload.length;A++){this.samples[B.payload[A].id]=B.payload[A]}}dafos.initCallback.callback()};dafos.CodeTab.prototype.onLoaded=function(){var A={save:dafos.bind(this.saveCode,this),saveas:dafos.bind(this.saveCodeAs,this),loadfile:dafos.bind(this.loadCode,this),deletefile:dafos.bind(this.deleteCode,this),execute:dafos.bind(this.runCode,this)};dafos.cansave=dafos.cansave&&dafos.opensocial.viewerIsOwner();this.codetabui.renderToolbar(dafos.opensocial,A);this.drawSamples()};dafos.CodeTab.prototype.drawSamples=function(){this.codetabui.clearSamplesList();for(var A in this.samples){if(this.samples.hasOwnProperty(A)){this.codetabui.addSample(this.samples[A].name,this.samples[A].id)}}};dafos.CodeTab.prototype.runCode=function(){eval(this.codetabui.getCodeText());pageTracker._trackPageview("track/action/execute")};dafos.CodeTab.prototype.saveCodeAs=function(){var A=new ark.InputDisplay(document.body);var B=this;A.show("Save code as?",function(C){if(C){B.current_file_name=C;B.saveCode.apply(B)}pageTracker._trackPageview("track/action/savecodeas")})};dafos.CodeTab.prototype.saveCode=function(){if(!this.current_file_name){this.saveCodeAs.apply(this)}else{this.gadgetui.showLoading("save");this.appengine.saveSample(this.current_file_name,this.codetabui.getCodeText(),dafos.opensocial.viewer&&dafos.opensocial.viewer.getDisplayName&&dafos.opensocial.viewer.getDisplayName(),dafos.bind(this.onCodeSaved,this))}pageTracker._trackPageview("track/action/savecode")};dafos.CodeTab.prototype.onCodeSaved=function(A){this.gadgetui.hideLoading("save");this.gadgetui.setMessage(A.message);if(A.status=="success"){this.current_file_name=A.payload.name;this.current_file_key=A.payload.id;this.samples[A.payload.id]=A.payload;this.drawSamples();this.codetabui.renderCurrentFile(this.current_file_name,this.current_file_key)}};dafos.CodeTab.prototype.deleteCode=function(){if(this.current_file_name){this.gadgetui.showLoading("delete");this.appengine.deleteRecord(this.current_file_key,dafos.bind(this.onCodeDeleted,this));delete this.samples[this.current_file_name]}pageTracker._trackPageview("track/action/deletecode")};dafos.CodeTab.prototype.onCodeDeleted=function(A){this.gadgetui.hideLoading("delete");this.gadgetui.setMessage(A.message);if(A.status=="success"){this.codetabui.clearUserOutput();this.codetabui.setCodeText("");delete this.samples[this.current_file_key];this.drawSamples();this.current_file_name="";this.current_file_key="";this.codetabui.renderCurrentFile("","")}};dafos.CodeTab.prototype.setCodeToSnippet=function(A){if(confirm("This will clear the contents of the Code tab.  Continue?")){this.codetabui.clearUserOutput();this.codetabui.setCodeText(A);this.drawSamples();this.current_file_name="";this.current_file_key="";this.codetabui.renderCurrentFile("","");return true}else{return false}};dafos.CodeTab.prototype.getCode=function(){return this.codetabui.getCodeText()};dafos.CodeTab.prototype.loadCode=function(){this.current_file_name=this.codetabui.getSelectedLoadText();this.current_file_key=this.codetabui.getSelectedLoadValue();this.gadgetui.showLoading("load");this.appengine.getSample(this.current_file_key,dafos.bind(this.onCodeLoaded,this));pageTracker._trackPageview("track/action/loadcode")};dafos.CodeTab.prototype.onCodeLoaded=function(A){this.gadgetui.hideLoading("load");this.gadgetui.setMessage(A.message);if(A.status=="success"){this.codetabui.clearUserOutput();this.codetabui.setCodeText(A.payload.text);this.codetabui.renderCurrentFile(this.current_file_name,this.current_file_key)}};dafos.CodeTabUI=function(A){this.loading_keys={};this.dom_wrap=A;this.dom_controls=document.getElementById("codetab_controls");this.dom_code_controls=document.getElementById("code_controls");this.dom_code=document.getElementById("code_exec");this.dom_filename=null;this.dom_handle=document.getElementById("dom_handle");this.dom_toolbar=document.getElementById("codetab_toolbar");this.dom_exec_button=null;this.clearUserOutput()};dafos.CodeTabUI.prototype.renderToolbar=function(C,B){var A=["Load one of ",C.owner.getDisplayName&&C.owner.getDisplayName()||"this user","'s samples..."].join("");this.dom_button_load=w23.e("a",{id:"button_load",onclick:B.loadfile,className:"dafos-button"},w23.e("img",{src:"http://osda.appspot.com/img/load.png"})," Load");this.dom_button_execute=w23.e("a",{id:"button_execute",onclick:B.execute,className:"dafos-button"},w23.e("img",{src:"http://osda.appspot.com/img/execute.png"})," Execute");this.dom_button_saveas=w23.e("a",{id:"button_saveas",onclick:B.saveas,className:"dafos-button"},w23.e("img",{src:"http://osda.appspot.com/img/saveas.png"})," Save code as");this.dom_button_delete=w23.e("a",{id:"button_delete",onclick:B.deletefile,className:"dafos-button"},w23.e("img",{src:"http://osda.appspot.com/img/delete.png"})," Delete");this.dom_button_save=w23.e("a",{id:"button_save",onclick:B.save,className:"dafos-button"},w23.e("img",{src:"http://osda.appspot.com/img/save.png"})," Save code");this.dom_select=w23.e("select",{id:"select_load"},w23.e("option",null,A));this.dom_select.style.display="none";this.dom_button_load.style.display="none";if(!dafos.cansave){this.dom_button_save.style.display="none";this.dom_button_saveas.style.display="none";this.dom_button_delete.style.display="none"}this.dom_toolbar.appendChild(w23.e("table",null,w23.e("tbody",null,w23.e("tr",null,w23.e("td",null,this.dom_select,this.dom_button_load,this.dom_button_saveas),w23.e("td",{style:{textAlign:"right",width:"auto"}},this.dom_button_execute)))));this.renderCodeControls();this.renderLoadedFileControls(B);gadgets.window.adjustHeight()};dafos.CodeTabUI.prototype.renderLoadedFileControls=function(A){this.dom_filename=w23.e("div",{id:"filename",className:"subtoolbar"});this.dom_file_link=w23.e("a",{target:"_blank"});this.dom_filename.appendChild(w23.e("span",null," Currently loaded ",w23.e("span",null,this.dom_file_link)," - ",this.dom_button_save,this.dom_button_delete));this.dom_filename.style.display="none";this.dom_controls.appendChild(this.dom_filename)};dafos.CodeTabUI.prototype.renderCodeControls=function(){var E={id:"button_code_down",onclick:dafos.bind(this.codeDown,this)};var B=w23.e("a",E,"Larger");var C={id:"button_code_up",onclick:dafos.bind(this.codeUp,this)};var A=w23.e("a",C,"Smaller");var D={id:"samplesbox",style:{display:"none"}};this.dom_samples=w23.e("div",D,"Samples");this.dom_code_controls.appendChild(w23.e("table",null,w23.e("tbody",null,w23.e("tr",null,w23.e("td",{className:"samplescell"},this.dom_samples),w23.e("td",{className:"controlcell"},B),w23.e("td",{className:"controlcell"},A)))));gadgets.window.adjustHeight()};dafos.CodeTabUI.prototype.codeDown=function(){this.dom_code.style.height=this.dom_code.offsetHeight+100+"px";gadgets.window.adjustHeight()};dafos.CodeTabUI.prototype.codeUp=function(){this.dom_code.style.height=Math.max(this.dom_code.offsetHeight-100,50)+"px";gadgets.window.adjustHeight()};dafos.CodeTabUI.prototype.clearSamplesList=function(){this.dom_select.innerHTML="";this.dom_select.style.display="none";this.dom_button_load.style.display="none";gadgets.window.adjustHeight()};dafos.CodeTabUI.prototype.addSample=function(A,B){this.dom_select.style.display="inline";this.dom_button_load.style.display="inline";params={value:B};this.dom_select.appendChild(w23.e("option",params,A));gadgets.window.adjustHeight()};dafos.CodeTabUI.prototype.getSelectedLoadValue=function(){return(this.dom_select&&this.dom_select.value)||""};dafos.CodeTabUI.prototype.getSelectedLoadText=function(){if(this.dom_select){return this.dom_select[this.dom_select.selectedIndex].innerHTML}else{return""}};dafos.CodeTabUI.prototype.clearUserOutput=function(){this.dom_handle.innerHTML=['<span class="dom_handle_label">','&lt;div id="dom_handle"&gt;</span>',"This <code>div</code> has an id of <code>dom_handle</code>"," that you can use to insert DOM elements into",'<span class="dom_handle_label">&lt;/div&gt;</span>'].join("");cls();gadgets.window.adjustHeight()};dafos.CodeTabUI.prototype.renderCurrentFile=function(B,D){var A=document.getElementById("select_load"),E=null,C=0;if(B&&B!=""){this.dom_file_link.innerHTML=gadgets.util.escapeString(B);this.dom_file_link.href="http://osda.appspot.com/code/sample/"+D;this.dom_filename.style.display="block";for(C=0,E;E=A.childNodes[C];C++){if(E.value==D){E.selected="selected"}}}else{this.dom_filename.style.display="none"}gadgets.window.adjustHeight()};dafos.CodeTabUI.prototype.setCodeText=function(A){this.dom_code.value=A};dafos.CodeTabUI.prototype.getCodeText=function(){return this.dom_code.value};dafos.onExportTabActivated=function(){if(dafos.exporttab==null){dafos.exporttab=new dafos.ExportTab(document.getElementById("exporttab"),dafos.ui)}pageTracker._trackPageview("track/tab/export");gadgets.window.adjustHeight(200);window.setTimeout(function(){gadgets.window.adjustHeight()},100)};dafos.ExportTab=function(A,C){this.appengine=new dafos.AppEngine();var B={savespecas:dafos.bind(this.saveAs,this),savespec:dafos.bind(this.save,this),loadspec:dafos.bind(this.load,this),deletespec:dafos.bind(this.deleteSpec,this),exportspec:dafos.bind(this.exportSpec,this)};this.gadgetui=C;this.ui=new dafos.ExportTabUI(A,B);this.gadgetui.showLoading("specs");this.appengine.getOwnerXmlSpecs(dafos.bind(this.onXmlSpecsLoaded,this));this.templates={};this.gadgetui.showLoading("xml-template");dafos.initCallback.getCallback();this.appengine.getXmlTemplate(this.closeOnTemplateLoaded("xml-template"));dafos.initCallback.addOnFinishedListener(dafos.bind(this.onTemplatesLoaded,this));this.current_spec_id_=null;this.current_spec_name_=null};dafos.ExportTab.prototype.closeOnTemplateLoaded=function(A){var B=this;return function(C){B.gadgetui.hideLoading(A);B.templates[A]=C||"";dafos.initCallback.callback()}};dafos.ExportTab.prototype.onTemplatesLoaded=function(){this.ui.renderExportButton()};dafos.ExportTab.prototype.onXmlSpecsLoaded=function(B){this.gadgetui.hideLoading("specs");this.gadgetui.setMessage(B.message);if(B.status=="success"){this.specs_={};for(var A=0;A<B.payload.length;A++){this.specs_[B.payload[A].id]=B.payload[A]}this.ui.renderXmlSpecList(this.specs_)}};dafos.ExportTab.prototype.saveAs=function(){var A=new ark.InputDisplay(document.body);var B=this;A.show("Save XML spec as?",function(C){if(C){B.current_spec_name_=C;B.save.apply(B)}pageTracker._trackPageview("track/action/savexmlspecas")})};dafos.ExportTab.prototype.save=function(){if(!this.current_spec_name_){this.saveAs.apply(this)}else{this.gadgetui.showLoading("save");this.appengine.saveXmlSpec(this.current_spec_name_,gadgets.json.stringify(this.ui.getFormData()),dafos.opensocial.viewer&&dafos.opensocial.viewer.getDisplayName&&dafos.opensocial.viewer.getDisplayName(),dafos.bind(this.onSaved,this))}pageTracker._trackPageview("track/action/savexmlspec")};dafos.ExportTab.prototype.onSaved=function(A){this.gadgetui.hideLoading("save");this.gadgetui.setMessage(A.message);if(A.status=="success"){this.current_spec_name_=A.payload.name;this.current_spec_id_=A.payload.id;this.specs_[A.payload.id]=A.payload;this.ui.renderXmlSpecList(this.specs_);this.ui.setCurrentSpec(this.current_spec_name_,this.current_spec_id_)}};dafos.ExportTab.prototype.load=function(){this.current_spec_name_=this.ui.getNameToLoad();this.current_spec_id_=this.ui.getIdToLoad();this.gadgetui.showLoading("load");this.appengine.getXmlSpec(this.current_spec_id_,dafos.bind(this.onLoaded,this));pageTracker._trackPageview("track/action/loadxmlspec")};dafos.ExportTab.prototype.onLoaded=function(A){this.gadgetui.hideLoading("load");this.gadgetui.setMessage(A.message);if(A.status=="success"){this.ui.setFormData(gadgets.json.parse(A.payload.text));this.ui.setCurrentSpec(this.current_spec_name_,this.current_spec_id_)}};dafos.ExportTab.prototype.deleteSpec=function(){this.gadgetui.showLoading("delete");this.appengine.deleteRecord(this.current_spec_id_,dafos.bind(this.onDeleted,this));pageTracker._trackPageview("track/action/loadxmlspec")};dafos.ExportTab.prototype.onDeleted=function(A){this.gadgetui.hideLoading("delete");this.gadgetui.setMessage(A.message);if(A.status=="success"){delete this.specs_[this.current_spec_id_];this.ui.renderXmlSpecList(this.specs_);this.current_spec_id_=null;this.current_spec_name_=null;this.ui.setCurrentSpec("","")}};dafos.ExportTab.prototype.exportSpec=function(){var N=this.ui.getFormData();var B=[];var H=[];var M=[];var K=this.templates["xml-template"];for(var L in N){if(N.hasOwnProperty(L)){if(this.isFeatureCheckboxKey_(L)){var O=this.getFeatureString_(L,N);if(O){B.push(O)}}else{if(L=="preloads"){for(var E=0,J;J=N[L][E];E++){H.push(this.getPreloadString_(J))}}else{if(L=="views"){for(var F in N[L]){var I=N[L][F];M.push(this.getViewString_(F,I))}}else{var G=new RegExp("@"+L+"@","g");K=K.replace(G,N[L])}}}}}var D=new RegExp("@export-features@","g");K=K.replace(D,B.join("\n"));var A=new RegExp("@export-preloads@","g");K=K.replace(A,H.join("\n"));var C=new RegExp("@export-views@","g");K=K.replace(C,M.join("\n"));this.ui.renderExportOutput(K);pageTracker._trackPageview("track/action/exportxmlspec")};dafos.ExportTab.prototype.getViewString_=function(B,A){return['<Content type="html" view="'+B+'">',"  <![CDATA[",A.html,"  ]","]>","</Content>"].join("\n")};dafos.ExportTab.prototype.getPreloadString_=function(A){var B='<Preload href="'+A["export-preload-href"]+'"';if(A["export-preload-auth"]=="signed"){B+=' authz="signed"';if(A["export-preload-sign-viewer"]==true){B+=' sign_viewer="true"'}if(A["export-preload-sign-owner"]==true){B+=' sign_owner="true"'}}B+=">";return B};dafos.ExportTab.prototype.isFeatureCheckboxKey_=function(A){return A.indexOf("export-features-")==0&&A.indexOf("-type")==-1};dafos.ExportTab.prototype.getFeatureString_=function(C,A){if(A[C]==true){var B=C.substring(16);var D=(A[C+"-type"]=="required")?"Require":"Optional";return"<"+D+' feature="'+B+'" />'}return null};dafos.ExportTabUI=function(A,B){this.dom_parent_=A;this.callbacks_=B;this.toolbar_=e34.$("exporttab_toolbar");this.toolbar_left_=e34.$("exporttab_toolbar_leftbuttons");this.toolbar_right_=e34.$("exporttab_toolbar_rightbuttons");this.filename_toolbar_=e34.$("exporttab_filename");this.filename_label_=e34.$("exporttab-loaded-file");this.preload_id_counter=0;this.views_={};this.render()};dafos.ExportTabUI.prototype.render=function(){e34.$("exporttab").removeClass("hidden");e34.$("export-preload-button-add").addOnClickHandler(dafos.bind(this.handleAddPreload,this));this.preload_table=e34.$("export-preload-table");this.preload_template=e34.$("export-preload-template");this.preload_parent=e34.$(this.preload_template.getParentElement());this.preload_table.hide();this.preload_template.removeFromParent();this.filename_toolbar_.hide();this.forEachFeatureCheckbox(function(E,C,D){E.addOnClickHandler(function(){if(E.getValue()==true){C.enable()}else{C.disable()}})});var B=this;this.load_button_=new e34widgets.IconLink("export-load-button","http://osda.appspot.com/img/load.png","Load").addClass("dafos-button").addOnClickHandler(this.callbacks_.loadspec);this.xmlspecs_list_=new e34widgets.DropDown("export-saved-entries-list",this.toolbar_left_).addOnItemsHandler(function(){this.show();B.load_button_.show()}).addOnEmptyHandler(function(){this.hide();B.load_button_.hide()});this.load_button_.setParent(this.toolbar_left_);if(dafos.cansave){this.saveas_button_=new e34widgets.IconLink("export-saveas-button","http://osda.appspot.com/img/saveas.png","Save XML spec as",this.toolbar_left_).addClass("dafos-button").addOnClickHandler(this.callbacks_.savespecas);this.save_button_=new e34widgets.IconLink("export-save-button","http://osda.appspot.com/img/save.png","Save",this.filename_toolbar_).addClass("dafos-button").addOnClickHandler(this.callbacks_.savespec);this.delete_button_=new e34widgets.IconLink("export-delete-button","http://osda.appspot.com/img/delete.png","Delete",this.filename_toolbar_).addClass("dafos-button").addOnClickHandler(this.callbacks_.deletespec)}this.view_parent_=e34.$("exporttab-view-tabs").getElement();this.view_template_=e34.$("exporttab-view-template").removeFromParent();this.view_tabs_=new gadgets.TabSet("exporttab-views",null,this.view_parent_);this.view_tabs_.alignTabs("left",10);this.addNewView("canvas").$C("view_delete")[0].removeFromParent();e34.$("exporttab-view-button-add").addOnClickHandler(dafos.bind(this.onNewViewClicked,this));var A=e34.$("exporttab-overlay-template").removeFromParent();this.overlay_=new e34widgets.Overlay("export-overlay","80%","50px",this.dom_parent_).addClass("overlay-shadow").addContentClass("overlay-content").setContent(A).hide();this.textbox_=A.$("exporttab-overlay-textbox").setStyleHeight("400px");var B=this;A.$("exporttab-overlay-button").addOnClickHandler(function(C){B.overlay_.hide();if(C.stopPropagation){C.stopPropagation()}return false});A.$("exporttab-overlay-clipboard-button").addOnClickHandler(function(C){if(B.copyElementContent(B.textbox_)){if(C.stopPropagation){C.stopPropagation()}return false}else{}})};dafos.ExportTabUI.prototype.renderExportButton=function(){this.export_button_=new e34widgets.IconLink("export-export-button","http://osda.appspot.com/img/execute.png","Export",this.toolbar_right_).addClass("dafos-button").addOnClickHandler(this.callbacks_.exportspec);new e34widgets.IconLink("export-export-button-bottom","http://osda.appspot.com/img/execute.png","Export",e34.$("exporttab-bottom-toolbar")).addClass("dafos-button").addOnClickHandler(this.callbacks_.exportspec)};dafos.ExportTabUI.prototype.forEachFeatureCheckbox=function(H){var F=e34.$("features-table");var E=F.$C("input","input");for(var C=0,D;D=E[C];C++){var G=D.getId();var B=G.replace(/export-features-/,"");var A=e34.$(G+"-type");H(D,A,B)}};dafos.ExportTabUI.prototype.renderXmlSpecList=function(B){this.xmlspecs_list_.clearOptions();for(var A in B){if(B.hasOwnProperty(A)){this.xmlspecs_list_.addOption(A,B[A].name)}}gadgets.window.adjustHeight()};dafos.ExportTabUI.prototype.addNewView=function(E){if(this.views_[E]){return this.views_[E]}var D=e34.renderTemplate(this.view_template_,{name:E});var F=D.$C("view_html_background")[0];var C=D.$C("view_html")[0];var A=new RegExp("(<script((?:.|\r\n|\n))*?<\/script>)","mgi");var H=null;var B=function(I){window.clearTimeout(H);H=window.setTimeout(function(){var J=C.getValue();if(J.search(A)>-1){J=J.replace(A,"@@@$1%%%")}J=J.replace(/(\r\n|\n)/gim,"[br]");J=gadgets.util.escapeString(J).replace(/@@@/g,"<span class='highlight'>").replace(/%%%/g,"</span>").replace(/\[br\]/g,"<br />").replace(/[ ]{2}/g,"&nbsp; ");F.getElement().innerHTML=J+"\n&nbsp;"},50)};C.addListener("keypress",B,true);C.addListener("scroll",function(I){F.getElement().scrollTop=C.getElement().scrollTop},true);D.$C("view_copy")[0].addOnClickHandler(function(M){var L=dafos.codetab.getCode();L="\n<script type='text/javascript'>\n"+L+"\n<\/script>\n";if(document.selection){C.getElement().focus();var K=document.selection.createRange();K.text=L}else{if(C.getElement().selectionStart!=undefined){var O=C.getElement().selectionStart;var J=C.getElement().selectionEnd;var I=C.getValue();var N=I.substring(0,O)+L+I.substring(J,I.length);C.setValue(N)}else{C.setValue(C.getValue()+L)}}B()});this.view_tabs_.addTab(E,{contentContainer:D.getElement()});var G=this;D.$C("view_delete")[0].addOnClickHandler(function(I){G.view_tabs_.removeTab(G.view_tabs_.getSelectedTab().getIndex());delete G.views_[E]});this.views_[E]=D;return D};dafos.ExportTabUI.prototype.onNewViewClicked=function(){var A=new ark.InputDisplay(this.view_parent_);var B=this;A.show("Name for the new view?",function(C){if(C){B.addNewView(C)}})};dafos.ExportTabUI.prototype.getNewPreloadRow=function(){return e34.renderTemplate(this.preload_template,{entry_id:this.preload_id_counter++,class_name:(this.preload_id_counter%2==0)?"even":"odd"})};dafos.ExportTabUI.prototype.handleAddPreload=function(){this.preload_table.show();this.preload_parent.appendChildren(this.getNewPreloadRow());gadgets.window.adjustHeight()};dafos.ExportTabUI.prototype.getFormData=function(){var A=e34.$C("input");var G={};G.preloads=[];G.views={};for(var E=0,F;F=A[E];E++){if(F.hasClass("preload")){var C=F.getTemplateNumber();if(C!=null){if(!G.preloads[C]){G.preloads[C]={}}G.preloads[C][F.getTemplateId()]=F.getValue()}}else{if(F.hasClass("view")){var B=F.$C("view_name")[0].getValue()||"default";var D=F.$C("view_html")[0].getValue();G.views[B]={html:D}}else{G[F.getId()]=F.getValue()}}}return G};dafos.ExportTabUI.prototype.setFormData=function(F){var B=e34.$C("input");for(var G=0,D;D=B[G];G++){if(!D.hasClass("preload")){D.setValue(F[D.getId()]||"")}}this.preload_parent.removeAllChildren();this.preload_id_counter=0;this.preload_table.hide();for(var E=0,K;K=F.preloads[E];E++){this.preload_table.show();var M=this.getNewPreloadRow().setParent(this.preload_parent);for(var L in K){if(K.hasOwnProperty(L)){var C=L+"-"+(this.preload_id_counter-1);e34.$(C).setValue(K[L])}}}var A=this.view_tabs_.getTabs();for(var I=A.length-1;I>0;I--){delete this.views_[A[I].getName()];this.view_tabs_.removeTab(I)}for(var H in F.views){var J=this.addNewView(H);J.$C("view_html")[0].setValue(F.views[H].html);J.$C("view_name")[0].setValue(H)}this.forEachFeatureCheckbox(function(P,N,O){if(P.getValue()==true){N.enable()}else{N.disable()}});gadgets.window.adjustHeight()};dafos.ExportTabUI.prototype.getIdToLoad=function(){return this.xmlspecs_list_.getValue()};dafos.ExportTabUI.prototype.getNameToLoad=function(){return this.xmlspecs_list_.getSelectedText()};dafos.ExportTabUI.prototype.setCurrentSpec=function(A,B){if(A&&A!=""){this.xmlspecs_list_.select(B);this.filename_label_.getElement().innerHTML=gadgets.util.escapeString(A);this.filename_toolbar_.show()}else{this.setFormData({});this.filename_toolbar_.hide();this.preload_parent.removeAllChildren();this.preload_id_counter=0;this.preload_table.hide()}gadgets.window.adjustHeight()};dafos.ExportTabUI.prototype.renderExportOutput=function(A){this.textbox_.setValue(A);this.overlay_.show()};dafos.ExportTabUI.prototype.copyElementContent=function(B){elem=e34.$(B).getElement();elem.select();if(window.clipboardData&&clipboardData.setData){clipboardData.setData("text",elem.value);return true}else{if(elem.createTextRange){var A=elem.createTextRange();if(A){A.execCommand("Copy");return true}}}return false};dafos.GadgetUI=function(A){this.dom_parent=A;this.loading_keys={};this.render()};dafos.GadgetUI.prototype.render=function(){var A={className:"dafos-message",style:{display:"none"}};var C={className:"dafos-error",style:{display:"none"}};var D={className:"dafos-notice"};var B={className:"dafos-loadbox",style:{display:"none",position:"absolute",right:"4px",top:"4px",backgroundColor:"#dd0000",padding:"4px",color:"#ffffff"}};var H={src:"http://osda.appspot.com/img/loading.png"};this.dom_message=w23.e("div",A);this.dom_parent.parentNode.insertBefore(this.dom_message,this.dom_parent);this.dom_error=w23.e("div",C);this.dom_parent.parentNode.insertBefore(this.dom_error,this.dom_parent);var G=document.createElement("a");G.href="http://code.google.com/p/opensocialdevapp/issues/entry?template=Issue%20report";G.target="_blank";G.innerHTML="Report an issue";var F=document.createElement("a");F.href="http://code.google.com/p/opensocialdevapp/issues/entry?template=Feature%20request";F.target="_blank";F.innerHTML="Request a feature";this.dom_parent.appendChild(w23.e("div",D,this.getVersion()," - ",G," - ",F));var E=w23.e("img",H);this.dom_loadmessage=w23.e("span",null);this.dom_loadbox=w23.e("div",B,E," Loading... ");this.dom_loadbox.appendChild(this.dom_loadmessage);this.dom_parent.appendChild(this.dom_loadbox);gadgets.window.adjustHeight()};dafos.GadgetUI.prototype.getVersion=function(){var A="OpenSocial Dev App";A+=" [0.8]";A+=" [track]";return A};dafos.GadgetUI.prototype.showLoading=function(A){if(A!=null){this.loading_keys[A]=true}var C=[];for(var B in this.loading_keys){if(this.loading_keys.hasOwnProperty(B)){C.push(B)}}this.dom_loadmessage.innerHTML=C.join(",");this.dom_loadbox.style.display="block";gadgets.window.adjustHeight()};dafos.GadgetUI.prototype.hideLoading=function(A){if(A!=null){delete this.loading_keys[A]}var C=[];for(var B in this.loading_keys){if(this.loading_keys.hasOwnProperty(B)){C.push(B)}}if(C.length==0){this.dom_loadbox.style.display="none"}else{this.dom_loadmessage.innerHTML=C.join(",")}gadgets.window.adjustHeight()};dafos.GadgetUI.prototype.setMessage=function(B){if(B&&B!=""){window.clearTimeout(this.dom_message_timeout);var A=this.dom_message;A.innerHTML=gadgets.util.escapeString(B);A.style.display="block";gadgets.window.adjustHeight();this.dom_message_timeout=window.setTimeout(function(){A.innerHTML="";A.style.display="none";gadgets.window.adjustHeight()},5000)}};dafos.GadgetUI.prototype.setError=function(B){if(B&&B!=""){window.clearTimeout(this.dom_error_timeout);var A=this.dom_error;A.innerHTML=gadgets.util.escapeString(B);A.style.display="block";gadgets.window.adjustHeight();this.dom_error_timeout=window.setTimeout(function(){A.innerHTML="";A.style.display="none";gadgets.window.adjustHeight()},10000)}};dafos.onHelpTabActivated=function(){if(dafos.helptab==null){dafos.helptab=new dafos.HelpTab(document.getElementById("helptab"),dafos.ui)}pageTracker._trackPageview("track/tab/help");gadgets.window.adjustHeight(200);window.setTimeout(function(){gadgets.window.adjustHeight()},100)};dafos.HelpTab=function(A,C){this.gadgetui=C;var B={onlinkclicked:dafos.bind(this.onLinkClicked,this)};this.ui=new dafos.HelpTabUI(A,B);this.requestHelpPage("")};dafos.HelpTab.prototype.requestHelpPage=function(C){this.gadgetui.showLoading("help");var B=C.indexOf("/help/");B=(B==-1)?-1:B+6;var A="http://osda.appspot.com/help/"+C.substring(B);var D={};D[gadgets.io.RequestParameters.CONTENT_TYPE]=gadgets.io.ContentType.TEXT;gadgets.io.makeRequest(A,dafos.bind(this.onHelpPage,this),D)};dafos.HelpTab.prototype.onHelpPage=function(D){this.gadgetui.hideLoading("help");var C=D.text.toLowerCase();var B=C.indexOf("<!-- starthelpcontent -->");if(B!=-1){B+=25}var A=C.indexOf("<!-- endhelpcontent -->");this.ui.renderHelpPage(D.text.substring(B,A))};dafos.HelpTab.prototype.onLinkClicked=function(A,B){e34.$("helptab-context-message").hide();this.requestHelpPage(A);if(B.stopPropagation){B.stopPropagation()}return false};dafos.HelpTabUI=function(A,B){this.dom_parent_=A;this.dom_output_=e34.$("helptab-output");this.callbacks_=B;this.render()};dafos.HelpTabUI.prototype.render=function(){e34.$("helptab").removeClass("hidden")};dafos.HelpTabUI.prototype.renderHelpPage=function(E){this.dom_output_.removeAllChildren();this.dom_output_.getElement().innerHTML=E;gadgets.window.adjustHeight(200);window.setTimeout(function(){gadgets.window.adjustHeight()},100);var D=this.dom_output_.$T("a");for(var C=0,B;B=D[C];C++){if(B.hasClass("external")){B.getElement().target="_blank"}else{var A=B.getElement().href;B.getElement().setAttribute("href","javascript:void(0);");B.addOnClickHandler(this.getClickHandler(this.callbacks_.onlinkclicked,A))}}};dafos.HelpTabUI.prototype.getClickHandler=function(B,A){return function(C){B(A,C)}};dafos.onNewsTabActivated=function(){if(dafos.newstab==null){dafos.newstab=new dafos.NewsTab(document.getElementById("newstab"),dafos.ui)}pageTracker._trackPageview("track/tab/news");gadgets.window.adjustHeight(200);window.setTimeout(function(){gadgets.window.adjustHeight()},100)};dafos.NewsTab=function(C,F){this.entries_=[];this.appengine=new dafos.AppEngine();var D={};this.gadgetui=F;this.ui=new dafos.NewsTabUI(C,D);var A=[];A.push({name:"myspace",url:"http://feeds.feedburner.com/myspace/rOsQ?format=xml",type:"dom"});A.push({name:"opensocial",url:"http://feeds.feedburner.com/OpensocialApiBlog?format=xml",type:"dom"});A.push({name:"orkut",url:"http://feeds.feedburner.com/OrkutDeveloperBlog?format=xml",type:"dom"});A.push({name:"hi5",url:"http://www.hi5networks.com/developer/atom.xml",type:"dom"});A.push({name:"igoogle",url:"http://feeds.feedburner.com/IgoogleDeveloperBlog?format=xml",type:"dom"});A.push({name:"ning",url:"http://feeds.feedburner.com/FeaturedBlogPosts-NingDeveloperNetwork?format=xml",type:"dom"});this.init_callback_=new ark.AggregateCallback(dafos.bind(this.onLoaded,this),A.length);for(var B=0,E;E=A[B];B++){this.gadgetui.showLoading(E.name);if(E.type=="feed"){this.getFeedData(E.url,dafos.bind(this.onFeedData,this,E.name))}else{this.getDomData(E.url,dafos.bind(this.onDomData,this,E.name))}}};dafos.NewsTab.prototype.getFeedData=function(A,C){var B={};B[gadgets.io.RequestParameters.CONTENT_TYPE]=gadgets.io.ContentType.FEED;B[gadgets.io.RequestParameters.GET_SUMMARIES]=true;gadgets.io.makeRequest(A,C,B)};dafos.NewsTab.prototype.getDomData=function(A,C){var B={};B[gadgets.io.RequestParameters.CONTENT_TYPE]=gadgets.io.ContentType.DOM;gadgets.io.makeRequest(A,C,B)};dafos.NewsTab.prototype.onFeedData=function(A,C){this.gadgetui.hideLoading(A);if(!C.data){this.init_callback_.callback();return }var B=C.data.Entry||C.data.items||[];for(var D=0,E;E=B[D];D++){this.entries_.push({feed_link:C.data.Link||C.data.link,feed_title:C.data.Title||C.data.title,entry_title:E.Title||E.title,entry_time:E.Date||E.date,entry_link:E.Link||E.link,entry_summary:E.Summary||E.summary||E.description})}this.init_callback_.callback()};dafos.NewsTab.prototype.onDomData=function(S,A){this.gadgetui.hideLoading(S);if(!A.data){this.init_callback_.callback();return }var I=A.data.getElementsByTagName("entry");var R=A.data.getElementsByTagName("feed")[0];var K="";var F="";for(var N=0,D;D=R.childNodes[N];N++){switch(D.tagName){case"title":F=D.textContent||D.text;break;case"link":if(D.attributes.getNamedItem("rel").nodeValue=="alternate"){K=D.attributes.getNamedItem("href").nodeValue}break}}for(var N=0,B;B=I[N];N++){var C={};C.feed_title=F;C.feed_link=K;for(var L=0,D;D=B.childNodes[L];L++){switch(D.tagName){case"title":C.entry_title=D.textContent||D.text;break;case"updated":var H=D.textContent||D.text;var J=H.substr(0,10).split("-");var Q=dafos.monthToString(Number(J[1]));var M=J[2];var G=J[0];var P=Q+" "+M+" "+G;var E=H.substr(11,8);if(H.length==25){var O=" UTC"+H.substr(19,6).split(":").join("")}else{var O=""}C.entry_time=Date.parse(P+" "+E+O);break;case"content":case"summary":C.entry_summary=D.textContent||D.text;break;case"link":if(D.attributes.getNamedItem("rel").nodeValue=="alternate"){C.entry_link=D.attributes.getNamedItem("href").nodeValue}break}}this.entries_.push(C)}this.init_callback_.callback()};dafos.NewsTab.prototype.onLoaded=function(){this.entries_.sort(this.entrySorter);this.ui.show();for(var A=0,B;B=this.entries_[A];A++){if(A>=15){break}this.ui.renderEntry(B)}};dafos.NewsTab.prototype.entrySorter=function(B,A){return A.entry_time-B.entry_time};dafos.NewsTabUI=function(A,B){this.dom_parent_=A;this.render(B)};dafos.NewsTabUI.prototype.render=function(A){e34.$("newstab").removeClass("hidden");this.entry_counter=0;this.toc_template=e34.$("newstab-toc-template");this.toc_parent=e34.$(this.toc_template.getParentElement());this.toc_template.removeFromParent();this.entry_template=e34.$("newstab-entries-item-template");this.entry_parent=e34.$(this.entry_template.getParentElement());this.entry_template.removeFromParent()};dafos.NewsTabUI.prototype.show=function(){e34.$("newstab-content").removeClass("hidden")};dafos.NewsTabUI.prototype.renderEntry=function(C){this.entry_counter++;var D=e34.renderTemplate(this.toc_template,{entry_id:this.entry_counter,class_name:(this.entry_counter%2==0)?"even":"odd",link:C.entry_link,title:C.entry_title,feed_title:C.feed_title,time:dafos.timeToPrettyString(C.entry_time)});this.toc_parent.appendChildren(D);var B=e34.renderTemplate(this.entry_template,{entry_id:this.entry_counter,link:C.entry_link,title:C.entry_title,feed_title:C.feed_title,feed_link:C.feed_link,time:dafos.timeToPrettyString(C.entry_time),summary:C.entry_summary});this.entry_parent.appendChildren(B);var A=D.$T("a")[0];A.addOnClickHandler(function(E){E.preventDefault();B.scrollIntoView()});gadgets.window.adjustHeight()};dafos.onSnippetsTabActivated=function(){if(dafos.snippetstab==null){dafos.snippetstab=new dafos.SnippetsTab(document.getElementById("snippetstab"),dafos.ui)}pageTracker._trackPageview("track/tab/snippets");gadgets.window.adjustHeight(200);window.setTimeout(function(){gadgets.window.adjustHeight()},100)};dafos.SnippetsTab=function(A,C){this.appengine=new dafos.AppEngine();var B={onselected:dafos.bind(this.onSelected,this)};this.gadgetui=C;this.ui=new dafos.SnippetsTabUI(A,B);this.gadgetui.showLoading("snippets");this.appengine.getGlobalSnippets(dafos.bind(this.onSnippetsLoaded,this))};dafos.SnippetsTab.prototype.onSnippetsLoaded=function(A){this.gadgetui.hideLoading("snippets");if(A.error){this.gadgetui.setError("Problem loading samples: "+A.error);return }this.gadgetui.setMessage(A.message);if(A.status=="success"){for(var B=0,C;C=A.payload[B];B++){this.ui.renderEntry(C)}}};dafos.SnippetsTab.prototype.onSelected=function(A){this.gadgetui.showLoading("sample");this.appengine.getSample(A,dafos.bind(this.onSampleLoaded,this))};dafos.SnippetsTab.prototype.onSampleLoaded=function(A){this.gadgetui.hideLoading("sample");if(A.error){this.gadgetui.setError(A.error);return }this.gadgetui.setMessage(A.message);if(A.status=="success"){var B=dafos.tabs.getTabs();for(var C=0,D;D=B[C];C++){if(D.getName().toLowerCase()=="code"){dafos.tabs.setSelectedTab(C);break}}dafos.codetab.setCodeToSnippet(A.payload.text)}};dafos.SnippetsTabUI=function(A,B){this.dom_parent_=A;this.callbacks_=B;this.render()};dafos.SnippetsTabUI.prototype.render=function(){e34.$("snippetstab").removeClass("hidden");this.entry_counter=0;this.entry_template=e34.$("snippetstab-entries-item-template");this.entry_parent=e34.$(this.entry_template.getParentElement());this.entry_template.removeFromParent()};dafos.SnippetsTabUI.prototype.renderEntry=function(C){this.entry_counter++;var A=e34.renderTemplate(this.entry_template,{id:this.entry_counter,title:C.name,time:dafos.timeToPrettyString(Date.parse(C.updated)),summary:C.description,code:C.text});var D=C.text.split("\n").length+2;var B=Math.round(D*1.125);A.$C("code")[0].setStyleHeight(B+"em");A.$C("load-link")[0].addOnClickHandler(dafos.bind(this.onSelected,this,C.id));this.entry_parent.appendChildren(A);gadgets.window.adjustHeight()};dafos.SnippetsTabUI.prototype.onSelected=function(A){pageTracker._trackPageview("track/action/loadsnippet/"+A);this.callbacks_.onselected(A)};dafos.onStateTabActivated=function(){if(dafos.statetab==null){dafos.statetab=new dafos.StateTab(document.getElementById("statetab"),dafos.ui)}pageTracker._trackPageview("track/tab/state");gadgets.window.adjustHeight(200);window.setTimeout(function(){gadgets.window.adjustHeight()},100)};dafos.StateTab=function(A,D){var C={ondetailsclicked:dafos.bind(this.traversePersonTree,this)};this.gadgetui=D;this.ui=new dafos.StateTabUI(A,C);this.person_fields_=[];for(var F in opensocial.Person.Field){if(opensocial.Person.Field.hasOwnProperty(F)){this.person_fields_.push(F)}}var B=this;var E=e34.$("statetab-fetchbyid-input");var G=new quikos.PeopleParams().addFields(this.person_fields_);e34.$("statetab-fetchviewer-button").addOnClickHandler(function(){new quikos().startRequest().fetchPerson(quikos.id.VIEWER,"person",G).fetchData(quikos.idspec.VIEWER,"data","*").sendRequest(dafos.bind(B.onPersonData,B,"Displaying the viewer:"))});e34.$("statetab-fetchowner-button").addOnClickHandler(function(){new quikos().startRequest().fetchPerson(quikos.id.OWNER,"person",G).fetchData(quikos.idspec.OWNER,"data","*").sendRequest(dafos.bind(B.onPersonData,B,"Displaying the owner:"))});e34.$("statetab-fetchviewerfriends-button").addOnClickHandler(this.closeGetPeople(quikos.idspec.VIEWER_FRIENDS,"Displaying the viewer's friends:",0,dafos.StateTab.PAGE_SIZE));e34.$("statetab-fetchownerfriends-button").addOnClickHandler(this.closeGetPeople(quikos.idspec.OWNER_FRIENDS,"Displaying the owner's friends:",0,dafos.StateTab.PAGE_SIZE));e34.$("statetab-fetchbyid-button").addOnClickHandler(function(){var H=E.getValue();new quikos().startRequest().fetchPerson(H,"person",G).fetchData(quikos.idspec.personById(H),"data","*").sendRequest(dafos.bind(B.onPersonData,B,"Displaying user #"+H+":"))});e34.$("statetab-fetchfriendsbyid-button").addOnClickHandler(function(){var H=E.getValue();B.closeGetPeople(quikos.idspec.friendsById(H),"Displaying friends of user #"+H+":",0,dafos.StateTab.PAGE_SIZE)()})};dafos.StateTab.PAGE_SIZE=20;dafos.StateTab.INDENT_SIZE=15;dafos.StateTab.FIELD_OBJECT={"Person Fields":"opensocial.Person.Field","opensocial.Person.Field.ADDRESSES":"opensocial.Address.Field","opensocial.Person.Field.CURRENT_LOCATION":"opensocial.Address.Field","opensocial.Person.Field.EMAILS":"opensocial.Email.Field","opensocial.Person.Field.JOBS":"opensocial.Organization.Field","opensocial.Person.Field.PHONE_NUMBERS":"opensocial.Phone.Field","opensocial.Person.Field.SCHOOLS":"opensocial.Organization.Field","opensocial.Person.Field.NAME":"opensocial.Name.Field","opensocial.Person.Field.URLS":"opensocial.Url.Field"};dafos.StateTab.prototype.closeGetPeople=function(B,E,D,A){var C=this;return function(){var F=new quikos.PeopleParams().setFirst(D).setMax(A).addFields(C.person_fields_);new quikos().startRequest().fetchPeople(B,"people",F).fetchData(B,"data","*").sendRequest(dafos.bind(C.onPeopleData,C,B,E))}};dafos.StateTab.prototype.onPersonData=function(C,A,B){this.ui.clearOutput();this.ui.renderTitle(C);if(A.person){var D=A.data&&A.data[A.person.getId()]||{};this.ui.renderPerson(A.person,D)}else{if(B.hadError("person")){this.gadgetui.setError(B.getFullErrorMessage("person"))}this.ui.renderPerson(this.ui.getFakePerson("unknown","This record was not found","http://osda.appspot.com/img/noperson.gif"))}gadgets.window.adjustHeight()};dafos.StateTab.prototype.onPeopleData=function(A,H,E,G){this.ui.clearOutput();this.ui.renderTitle(H);if(E.people&&E.people.size()>0){var D=this.ui.renderPagingControls(E.people.getOffset(),E.people.size(),E.people.getTotalSize());if(D.prev){var F=Math.max(E.people.getOffset()-dafos.StateTab.PAGE_SIZE,0);var B=this.closeGetPeople(A,H,F,dafos.StateTab.PAGE_SIZE);D.prev.addOnClickHandler(B)}if(D.next){var F=E.people.getOffset()+dafos.StateTab.PAGE_SIZE;var B=this.closeGetPeople(A,H,F,dafos.StateTab.PAGE_SIZE);D.next.addOnClickHandler(B)}var C=this;E.people.each(function(I){var J=E.data&&E.data[I.getId()]||{};C.ui.renderPerson(I,J)})}else{if(G.hadError("people")){this.gadgetui.setError(G.getFullErrorMessage("people"))}this.ui.renderPerson(this.ui.getFakePerson("unknown","These records were not found","http://osda.appspot.com/img/nopeople.gif"))}gadgets.window.adjustHeight()};dafos.StateTab.prototype.traversePersonTree=function(F,A,B){this.ui.hideShowDetailsButton(F);var C=[{key:"Person Fields",modifier:"",data:A,ns:"opensocial.Person.Field",depth:0}];var E=dafos.bind(this.ui.renderPersonField,this.ui,F);this.traverseObject(C,E);var D=[{key:"Persistence Data",modifier:"",data:B,ns:"",depth:0}];this.traverseObject(D,E);gadgets.window.adjustHeight()};dafos.StateTab.prototype.queueSort=function(B,A){var C=B.key+B.modifier;var D=A.key+A.modifier;if(C==D){return 0}return(C>D)?-1:1};dafos.StateTab.prototype.traverseObject=function(I,M){while(I.length>0){var B=I.pop();if(e34.isString(B.data)||e34.isBoolean(B.data)){M(B.key+B.modifier,B.data,B.depth)}else{if(e34.isNumber(B.data)){M(B.key+B.modifier,B.data.toString(),B.depth)}else{if(e34.isBoolean(B.data)){M(B.key+B.modifier,B.data,B.depth)}else{if(B.data.getDisplayValue){M(B.key+B.modifier,"&nbsp;",B.depth);M("opensocial.Enum.getDisplayValue()",B.data.getDisplayValue(),B.depth+1);M("opensocial.Enum.getKey()",B.data.getKey(),B.depth+1)}else{if(e34.isArray(B.data)){var K=[];for(var G=0,J=B.data.length;G<J;G++){var N=B.data[G];var F={key:B.key,modifier:" ["+G+"]",data:N,ns:B.ns,depth:B.depth};K.push(F)}K.sort(this.queueSort);while(K.length>0){I.push(K.shift())}}else{if(B.data.getField){var H=this.getFieldsForObject_(B.key);if(H){M(B.key+B.modifier,"&nbsp;",B.depth)}var C=dafos.StateTab.FIELD_OBJECT[B.key];var E=B.depth+1;var K=[];for(var A in H){var D=B.data.getField(H[A]);var L=C+"."+A;if(D!=undefined){var F={key:L,modifier:"",data:D,ns:C,depth:E};K.push(F)}}K.sort(this.queueSort);while(K.length>0){I.push(K.shift())}}else{if(e34.isObject(B.data)){M(B.key+B.modifier,"&nbsp;",B.depth);for(var L in B.data){if(B.data.hasOwnProperty(L)){var D=B.data[L];if(D!=undefined){var F={key:L,modifier:"",data:D,ns:C,depth:B.depth+1};I.push(F)}}}}else{M(B.key+B.modifier,"Unknown",B.depth)}}}}}}}}gadgets.window.adjustHeight()};dafos.StateTab.prototype.resolveNamespace_=function(C){var D=C.split(".");var E=window;for(var B=0,A;A=D[B];B++){E=E[A]||{}}return E};dafos.StateTab.prototype.getFieldsForObject_=function(A){if(dafos.StateTab.FIELD_OBJECT[A]!=undefined){return this.resolveNamespace_(dafos.StateTab.FIELD_OBJECT[A])}else{var B={};return B}};dafos.StateTabUI=function(A,B){this.dom_parent_=A;this.callbacks_=B;this.field_row_template_=e34.$("statetab-fields-row-template").removeFromParent();this.field_table_template_=e34.$("statetab-fields-template").removeFromParent();this.person_template_=e34.$("statetab-person-template").removeFromParent();this.dom_output_=e34.$("statetab-output");this.render();this.rendered_people_=0;this.row_parents_={};this.row_counts_={};this.render()};dafos.StateTabUI.prototype.render=function(){e34.$("statetab").removeClass("hidden")};dafos.StateTabUI.prototype.renderTitle=function(A){var A=e34.renderTemplate("<h2>@title@</h2>",{title:A});A.setParent(this.dom_output_)};dafos.StateTabUI.prototype.renderPagingControls=function(G,B,D){var F=e34.renderTemplate("<p>Showing @start@ to @end@ of @total@. </p>",{start:G+1,end:B+G,total:D});var C={};if(G>0){var E=e34.renderTemplate("<span><a href='javascript:void(0);'>Previous</a> </span>",{});E.setParent(F);C.prev=E}if(B+G<D){var A=e34.renderTemplate("<span><a href='javascript:void(0);'>Next</a> </span>",{});A.setParent(F);C.next=A}F.setParent(this.dom_output_);return C};dafos.StateTabUI.prototype.clearOutput=function(){this.dom_output_.removeAllChildren();this.rendered_people_=0;this.row_parents_={};this.row_counts_={}};dafos.StateTabUI.prototype.renderPerson=function(D,E){if(D){var B=++this.rendered_people_;var C=(B%2==0)?"odd":"even";var A=D.getField("thumbnailUrl")||"http://osda.appspot.com/img/nophoto.gif";var G=e34.renderTemplate(this.person_template_,{id:B,classname:C,person_displayname:D.getDisplayName(),person_id:D.getId()});G.$T("img")[0].getElement().src=A;G.setParent(this.dom_output_);var F=G.$("statetab-details-button-"+B);if(D.isFakePerson){F.hide()}else{var H=dafos.bind(this.callbacks_.ondetailsclicked,this,B,D,E);F.addOnClickHandler(H);var I=e34.renderTemplate(this.field_table_template_).setParent(F.getParentElement()).addClass("fieldstable").hide();this.row_parents_[B]=I;this.row_counts_[B]=0}gadgets.window.adjustHeight()}};dafos.StateTabUI.prototype.getFakePerson=function(C,B,A){return{getDisplayName:function(){return B},getId:function(){return C},getField:function(D){switch(D){case"thumbnailUrl":return A}},isFakePerson:true}};dafos.StateTabUI.prototype.renderPersonField=function(A,J,H,E){var F=this.row_parents_[A];var B=this.row_counts_[A]++;var C=(E==0)?"headerrow":"fieldrow";var G="";for(var D=0;D<E;D++){G+="\t"}var K=e34.renderTemplate(this.field_row_template_,{key:gadgets.util.escapeString(G+J),value:gadgets.util.escapeString(H||""),classname:C}).setParent(F.$T("tbody")[0]);var I=K.$T("td")[0]};dafos.StateTabUI.prototype.hideShowDetailsButton=function(A){e34.$("statetab-details-button-"+A).hide();this.row_parents_[A].show()};var e34=function(A,B){B=(B==undefined)?true:B;this.element_=A;if(B==true){this.assertElement_()}};e34.$=function(A){if(e34.isString(A)){return new e34(document.getElementById(A))}else{if(e34.isElement(A)){return new e34(A)}else{if(e34.isE34_(A)){return A}else{return null}}}};e34.$C=function(B,A,C){if(document.getElementsByClassName){getElementsByClassName=function(I,L,H){H=H||document;var D=H.getElementsByClassName(I);var K=(L)?new RegExp("\\b"+L+"\\b","i"):null;var E=[];var G;for(var F=0,J=D.length;F<J;F+=1){G=D[F];if(!K||K.test(G.nodeName)){E.push(e34.$(G))}}return E}}else{if(document.evaluate){getElementsByClassName=function(M,P,L){P=P||"*";L=L||document;var F=M.split(" ");var N="";var J="http://www.w3.org/1999/xhtml";var O=(document.documentElement.namespaceURI===J)?J:null;var G=[];var D;var E;for(var H=0,I=F.length;H<I;H+=1){N+="[contains(concat(' ', @class, ' '), ' "+F[H]+" ')]"}try{D=document.evaluate(".//"+P+N,L,O,0,null)}catch(K){D=document.evaluate(".//"+P+N,L,null,0,null)}while((E=D.iterateNext())){G.push(e34.$(E))}return G}}else{getElementsByClassName=function(O,R,N){R=R||"*";N=N||document;var H=O.split(" ");var Q=[];var D=(R==="*"&&N.all)?N.all:N.getElementsByTagName(R);var M;var J=[];var L;for(var I=0,E=H.length;I<E;I+=1){Q.push(new RegExp("(^|\\s)"+H[I]+"(\\s|$)"))}for(var G=0,P=D.length;G<P;G+=1){M=D[G];L=false;for(var F=0,K=Q.length;F<K;F+=1){L=Q[F].test(M.className);if(!L){break}}if(L){J.push(e34.$(M))}}return J}}}if(C){C=e34.$(C).getElement()}return getElementsByClassName(B,A,C)};e34.renderTemplate=function(A,B){if(e34.isString(A)){return e34.renderStringTemplate_(A,B)}else{if(e34.isElement(A)||e34.isE34_(A)){return e34.renderStringTemplate_(e34.serializeElement_(A),B)}else{return null}}};e34.serializeElement_=function(A){A=e34.$(A);var B=document.createElement("div");B.appendChild(A.getElement().cloneNode(true));return B.innerHTML};e34.renderStringTemplate_=function(C,F){for(var B in F){if(F.hasOwnProperty(B)){var A=RegExp("@"+B+"@","g");C=C.replace(A,F[B])}}var G=/^<([^>]*)\s+(?:id='[^'>]*'|id="[^">]*"|id=[^"' >]*)(\s*[^>]*)>/;C=C.replace(G,"<$1$2>");var E=null;var D=document.createElement("div");if(C.match(/^<(?:tr|TR)/)){D.innerHTML="<table><tbody>"+C+"</tbody></table>";E=D.childNodes[0].childNodes[0].childNodes[0]}else{if(C.match(/^<(?:option|OPTION)/)){D.innerHTML="<select>"+C+"</select>";E=D.childNodes[0].childNodes[0]}else{D.innerHTML=C;E=D.childNodes[0]}}if(E){return new e34(E)}else{return null}};e34.isString=function(A){return(typeof A=="string")};e34.isElement=function(A){return A&&A.nodeType&&A.nodeType==1};e34.isBoolean=function(A){return A===true||A===false};e34.isNumber=function(A){return !isNaN(A)};e34.isObject=function(A){return(typeof A==typeof ({}))};e34.isE34_=function(A){return A&&A.e34version_};e34.isArray=function(A){return A&&!!A.length};e34.isFunction=function(A){return(typeof A=="function")};e34.prototype.e34version_=1;e34.prototype.assertElement_=function(){if(e34.isElement(this.element_)){return this}throw new Error("e34 object was not assigned to an Element")};e34.prototype.$C=function(A,B){return e34.$C(A,B,this.element_)};e34.prototype.getId=function(){return this.element_.id};e34.prototype.getClasses=function(){return this.element_.className.split(" ")};e34.prototype.getElement=function(){return this.element_};e34.prototype.getTagName=function(){return this.element_.tagName.toUpperCase()};e34.prototype.getParentElement=function(){return this.element_.parentNode};e34.prototype.getTemplateId=function(){var A=/([^ ]+)-[0-9]+$/.exec(this.element_.id);if(A){return A[1]}else{return this.element_.id}};e34.prototype.getTemplateNumber=function(){var A=/-([0-9]+)$/.exec(this.element_.id);if(A){return Number(A[1])}else{return null}};e34.prototype.getNumberedElement=function(A){};e34.prototype.appendChildren=function(){for(var A=0;A<arguments.length;A++){this.element_.appendChild(e34.$(arguments[A]).getElement())}return this};e34.prototype.setParent=function(A){e34.$(A).getElement().appendChild(this.getElement());return this};e34.prototype.removeFromParent=function(){this.element_.parentNode.removeChild(this.element_);return this};e34.prototype.removeAllChildren=function(){this.element_.innerHTML="";return this};e34.prototype.replaceElement=function(A){if(e34.isE34_(A)){var B=this.getParentElement();this.removeFromParent();B.appendChild(A.getElement())}return this};e34.prototype.setInnerHTML=function(A){this.element_.innerHTML=A};e34.prototype.hasClass=function(A){var B=RegExp("\\b"+A+"\\b");return this.element_.className&&!!this.element_.className.match(B)};e34.prototype.addClass=function(A){var B=this.element_.className||"";var C=RegExp("(\\S$)");if(!this.hasClass(A)){B=B.replace(C,"$1 ")+A}this.element_.className=B;return this};e34.prototype.removeClass=function(A){var B=this.element_.className||"";var C=RegExp("(\\s*\\b"+A+"\\b(\\s*))*","g");B=B.replace(C,"$2");this.element_.className=B;return this};e34.prototype.toggleClass=function(A){if(this.hasClass(A)){this.removeClass(A)}else{this.addClass(A)}return this};e34.prototype.addListener=function(B,C,A){if(!this.element_.addEventListener){this.element_.attachEvent("on"+B,C)}else{this.element_.addEventListener(B,C,A)}};e34.prototype.addOnClickHandler=function(A){this.addListener("click",A,true);return this};e34.prototype.hide=function(){if(this.element_.style.display!="none"){this.old_style_display_=this.element_.style.display;this.element_.style.display="none"}return this};e34.prototype.show=function(){if(this.element_.style.display=="none"){this.element_.style.display=this.old_style_display_}return this};e34.prototype.enable=function(){this.element_.disabled=false};e34.prototype.disable=function(){this.element_.disabled=true};e34.prototype.getValue=function(){if(this.element_.type&&this.element_.type=="checkbox"){return this.element_.checked}else{return this.element_.value}};e34.prototype.setValue=function(A){if(this.element_.type&&this.element_.type=="checkbox"){this.element_.checked=!!A}else{this.element_.value=A}return this};e34.prototype.getPosition=function(){var A={x:0,y:0};var B=this.element_;while(B){A.x+=B.offsetLeft;A.y+=B.offsetTop;B=B.offsetParent}return A};e34.prototype.getDimensions=function(){var A={width:this.element_.offsetWidth,height:this.element_.offsetHeight};return A};e34.prototype.getAttribute=function(A){return this.element_.getAttribute(A)};e34.prototype.scrollIntoView=function(){this.element_.scrollIntoView(true);return this};e34.prototype.$T=function(A){var C=this.element_.getElementsByTagName(A);var B=[];for(var D=0,E;E=C[D];D++){B.push(e34.$(E))}return B};e34.prototype.getChild=function(A){return e34.$(this.element_.childNodes[A])};e34.prototype.setStylePosition=function(A){this.element_.style.position=A;return this};e34.prototype.setStyleLeft=function(A){this.element_.style.left=A;return this};e34.prototype.setStyleTop=function(A){this.element_.style.top=A;return this};e34.prototype.setStyleWidth=function(A){this.element_.style.width=A;return this};e34.prototype.setStyleHeight=function(A){this.element_.style.height=A;return this};e34.prototype.setStyleMarginLeft=function(A){this.element_.style.marginLeft=A;return this};e34.prototype.setStylePaddingLeft=function(A){this.element_.style.paddingLeft=A;return this};e34.prototype.$=function(A){return e34.$(this.element_.ownerDocument.getElementById(A))};var e34widgets=function(){};e34widgets.IconLink=function(F,B,E,A){var C="<a id='@id@' href='javascript:void(0);' class='iconlink'><img src='@img@' /> @text@</a>";var D={id:F,img:B,text:E};this.element_=e34.renderTemplate(C,D).getElement();if(A){e34.$(A).appendChildren(this.element_)}};e34widgets.IconLink.prototype=new e34(null,false);e34widgets.DropDown=function(C,B){var A="<select id='@id@'></select>";this.option_template_="<option value=@value@>@text@</option>";this.num_options_=0;this.onempty_handler_=null;this.onitems_handler_=null;this.element_=e34.renderTemplate(A,{id:C}).getElement();if(B){e34.$(B).appendChildren(this.element_)}};e34widgets.DropDown.prototype=new e34(null,false);e34widgets.DropDown.prototype.checkOptionsHandlers_=function(){if(this.num_options_==1&&this.onitems_handler_){this.onitems_handler_(this)}else{if(this.num_options_==0&&this.onempty_handler_){this.onempty_handler_(this)}}return this};e34widgets.DropDown.prototype.addOption=function(B,C){var A=e34.renderTemplate(this.option_template_,{value:B,text:C});this.appendChildren(A);this.num_options_++;this.checkOptionsHandlers_();return this};e34widgets.DropDown.prototype.clearOptions=function(){this.removeAllChildren();this.num_options_=0;this.checkOptionsHandlers_();return this};e34widgets.DropDown.prototype.addOnItemsHandler=function(A){if(e34.isFunction(A)){this.onitems_handler_=A}this.checkOptionsHandlers_();return this};e34widgets.DropDown.prototype.addOnEmptyHandler=function(A){if(e34.isFunction(A)){this.onempty_handler_=A}this.checkOptionsHandlers_();return this};e34widgets.DropDown.prototype.getSelectedText=function(){return this.element_[this.element_.selectedIndex].innerHTML};e34widgets.DropDown.prototype.select=function(C){for(var A=0,B;B=this.element_.childNodes[A];A++){if(B.value==C){B.selected="selected"}}return this};e34widgets.Overlay=function(F,B,D,A){var C="<div id='@id@'></div>";var E="<div></div>";this.element_=e34.renderTemplate(C,{id:F}).getElement();if(A){e34.$(A).appendChildren(this.element_)}this.setStylePosition("absolute").setStyleLeft("50%").setWidth(B).setStyleTop(D);this.content_element_=e34.renderTemplate(E,{}).setParent(this.element_).setStylePosition("relative")};e34widgets.Overlay.prototype=new e34(null,false);e34widgets.Overlay.prototype.setContent=function(A){e34.$(A).setParent(this.content_element_);return this};e34widgets.Overlay.prototype.setWidth=function(A){this.setStyleWidth(A);var B="-"+Math.round(this.getDimensions().width/2)+"px";this.setStyleMarginLeft(B);return this};e34widgets.Overlay.prototype.addContentClass=function(A){this.content_element_.addClass(A);return this};var output_buffer=[];function getArgsAsArray(B){var A=[];for(var C=0;C<B.length;C++){A.push(B[C])}return A}function output(){var B=getArgsAsArray(output.arguments);var A=document.getElementById("output");if(window.console&&console.log){console.log("output",B)}output_buffer.push(B.join(" "));while(output_buffer.length>400){output_buffer.shift()}A.innerHTML=output_buffer.join("<br />");A.scrollTop=A.scrollHeight;if(A.style.display=="none"){A.style.display="block"}gadgets.window.adjustHeight()}function cls(){output_buffer=[];var A=document.getElementById("output");A.innerHTML="";A.style.display="none";gadgets.window.adjustHeight()}dafos.onCodeTabActivated=function(){pageTracker._trackPageview("track/tab/code");gadgets.window.adjustHeight(200);window.setTimeout(function(){gadgets.window.adjustHeight()},100)};dafos.onOpenSocialData=function(A){dafos.ui.hideLoading("opensocial");if(dafos.opensocial.viewerIsOwner()){pageTracker._setVar("user/viewer==owner")}else{pageTracker._setVar("user/viewer!=owner")}pageTracker._setVar("container/"+opensocial.getEnvironment().getDomain());dafos.initCallback.callback()};dafos.onLastLoadedSet=function(B,A){};dafos.onViewerSettingsAvailable=function(D,C){var B="Code";if(dafos.viewname!="profile"&&dafos.viewname!="home"){var E=D.viewer&&D.viewer.getId();if(E){var A=D.data&&D.data[E]&&D.data[E]["lastloaded"];if(!A){B="Help";e34.$("helptab-context-message").show();pageTracker._setVar("user/new")}else{e34.$("helptab-context-message").hide();pageTracker._setVar("user/repeat")}}}new quikos().startRequest().setData("lastloaded",new Date().getTime(),"setdata").fetchData(quikos.idspec.VIEWER,"fetchdata").sendRequest(dafos.onLastLoadedSet);dafos.createTabs(B)};dafos.createTabs=function(B){dafos.tabs=new gadgets.TabSet("dafos",B,dafos.wrap);dafos.tabs.alignTabs("left",10);dafos.tabs.addTab("Code",{contentContainer:document.getElementById("codetab"),callback:dafos.onCodeTabActivated,tooltip:"Write and test JavaScript code"});dafos.codetab=new dafos.CodeTab(dafos.wrap,dafos.ui);if(dafos.viewname!="profile"&&dafos.viewname!="home"){dafos.tabs.addTab("News",{contentContainer:document.getElementById("newstab"),callback:dafos.onNewsTabActivated,tooltip:"OpenSocial news"});dafos.tabs.addTab("Samples",{contentContainer:document.getElementById("snippetstab"),callback:dafos.onSnippetsTabActivated,tooltop:"Code snippets to help you get started"});dafos.tabs.addTab("Data Viewer",{contentContainer:document.getElementById("statetab"),callback:dafos.onStateTabActivated,tooltip:"State viewer"});dafos.tabs.addTab("Export XML",{contentContainer:document.getElementById("exporttab"),callback:dafos.onExportTabActivated,tooltip:"Export an XML file"});dafos.tabs.addTab("Help",{contentContainer:document.getElementById("helptab"),callback:dafos.onHelpTabActivated,tooltop:"Help"})}else{var A=gadgets.views.getSupportedViews()["canvas"];if(A){dafos.tabs.addTab("Canvas view",{callback:function(){gadgets.views.requestNavigateTo(A)},tooltop:"Navigate to the canvas view"})}}};dafos.init=function(){};dafos.onError=function(C,B,A){dafos.ui.setError(C)};gadgets.util.registerOnLoadHandler(function(){dafos.initCallback=new ark.AggregateCallback(dafos.init);dafos.cansave=false;dafos.wrap=document.getElementById("wrap");dafos.ui=new dafos.GadgetUI(dafos.wrap);dafos.opensocial=new dafos.OpenSocial();dafos.viewname=gadgets.views.getCurrentView().getName();onerror=dafos.onError;dafos.ui.showLoading("opensocial");dafos.initCallback.getCallback();dafos.opensocial.getOpenSocialData("*",dafos.onOpenSocialData);new quikos().startRequest().fetchPerson(quikos.id.VIEWER,"viewer").fetchData(quikos.idspec.VIEWER,"data").sendRequest(dafos.onViewerSettingsAvailable)});
+    </script>
+  ]]>
+</Content>
+  <Content type="html" view="profile,home">
+  <![CDATA[
+      <div id="wrap" class="profile">
+        <div id="codetab">
+          <div id="sample_exec">
+            <div id="codetab_controls" class="controls">
+              <div id="codetab_toolbar" class="toolbar"></div>
+            </div>
+            <div id="code_controls"></div>
+            <textarea class="code" id="code_exec">
+            </textarea>
+          </div>
+          <div id="dom_handle"></div>
+          <!-- Scrolling output buffer -->
+          <div id="output"></div>
+        </div>
+      <script type="text/javascript">
+        document.write(unescape("%3Cscript src='http://www.google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+      </script>
+      <script type="text/javascript">
+        var pageTracker = _gat._getTracker("UA-5081674-1");
+        pageTracker._initData();
+        pageTracker._trackPageview();
+      </script>
+   ]]>
+  </Content>
+  <Content type="html" view="default,canvas" >
+    <![CDATA[
+      <div id="wrap">
+        <div id="codetab">
+          <div id="sample_exec">
+            <div id="codetab_controls" class="controls">
+              <div id="codetab_toolbar" class="toolbar"></div>
+            </div>
+            <div id="code_controls"></div>
+            <textarea class="code" id="code_exec">
+/**
+ * DEFAULT SAMPLE CODE (0.8)
+ * Fetches the OWNER and their friends.
+ */
+function response(data) {
+  cls();
+  if (data.hadError()) {
+    if (data.get("req").hadError()) {
+      output("Error: " + data.get("req").getErrorMessage());
+    }
+    if (data.get("req_friends").hadError()) {
+      output("Error: " + data.get("req_friends").getErrorMessage());
+    }
+    return;
+  }
+  output(data.get("req").getData().getDisplayName() + "'s Friends:");
+  output("========================");
+  data.get("req_friends").getData().each(function(person) {
+    output(person.getDisplayName());
+  });
+  gadgets.window.adjustHeight();
+};
+function request() {
+  var req = opensocial.newDataRequest();
+  var spec = opensocial.newIdSpec({"userId" : "OWNER", "groupId" : "FRIENDS"});
+  var params = {
+    "max" : 30
+  };
+  req.add(req.newFetchPersonRequest(opensocial.IdSpec.PersonId.OWNER), "req");
+  req.add(req.newFetchPeopleRequest(spec, params), "req_friends");
+  req.send(response);
+};
+request();
+            </textarea>
+          </div>
+          <div id="dom_handle"></div>
+          <!-- Scrolling output buffer -->
+          <div id="output"></div>
+        </div>
+        <div id="newstab" class="hidden">
+          <div id="newstab_controls" class="controls">
+            <div id="newstab_toolbar" class="toolbar">&nbsp;</div>
+          </div>
+          <div id="newstab-content" class="hidden">
+            <div id="newstab-toc">
+              <table id="newstab-toc-table" class="tabular" cellspacing="0" cellpadding="0">
+                <thead>
+                  <tr>
+                    <th>Latest OpenSocial News:</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr id="newstab-toc-template" class="@class_name@">
+                    <td>
+                      <div class="title"><a href="@link@" target="_blank">@title@</a></div>
+                      <div class="subtitle">From @feed_title@ @time@.</div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <ul id="newstab-entries" class="entries-list">
+              <li id="newstab-entries-item-template" class="entry">
+                <div class="title"><a target="_blank" href="@link@">@title@</a></div>
+                <div class="subtitle">
+                  From <a target="_blank" href="@feed_link@">@feed_title@</a> @time@.
+                </div>
+                <div class="summary">@summary@</div>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div id="snippetstab" class="hidden">
+          <div id="snippetstab_controls" class="controls">
+            <div id="snippetstab_toolbar" class="toolbar">&nbsp;</div>
+          </div>
+            <ul id="snippetstab-entries" class="entries-list">
+              <li id="snippetstab-entries-item-template" class="entry">
+                <div class="title">@title@</div>
+                <div class="subtitle">
+                  Updated @time@.
+                </div>
+                <div class="summary">@summary@</div>
+                <textarea readonly="readonly" class="code">@code@</textarea>
+                <p><button class="load-link">Load in Code tab</button></p>
+              </li>
+            </ul>
+        </div>
+        <div id="statetab" class="hidden" >
+          <div id="statetab_controls" class="controls">
+            <div id="statetab_toolbar" class="toolbar">&nbsp;</div>
+          </div>
+            <h2>Select a person or group of people to display</h2>
+            <p>
+              <button id="statetab-fetchviewer-button">Viewer</button>
+              <button id="statetab-fetchowner-button">Owner</button>
+              <button id="statetab-fetchviewerfriends-button">Viewer Friends</button>
+              <button id="statetab-fetchownerfriends-button">Owner Friends</button>
+            </p>
+            <p>
+              <label>Enter a user&#39;s ID: <input type="text" id="statetab-fetchbyid-input"></input></label>
+              <button id="statetab-fetchbyid-button">Person by ID</button>
+              <button id="statetab-fetchfriendsbyid-button">Friends by ID</button>
+            </p>
+            <div id="statetab-output"></div>
+            <div id="statetab-person-template">
+              <table class="@classname@ person">
+                <tbody>
+                  <tr>
+                    <td rowspan="100%" class="thumbnail">
+                      <img src="" class="thumbnail" />
+                    </td>
+                    <td>
+                      <h3 class="persondisplayname">@person_displayname@</h3>
+                      <h4 class="personid">@person_id@</h4>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <button id="statetab-details-button-@id@">Show details</button>
+                      <table id="statetab-fields-template">
+                        <tbody>
+                          <tr id="statetab-fields-row-template" class="@classname@">
+                            <td class="key"><pre>@key@</pre></td>
+                            <td class="value">@value@</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+        </div>
+        <div id="exporttab" class="hidden">
+            <div id="exporttab_controls" class="controls">
+              <div id="exporttab_toolbar" class="toolbar">
+                <table>
+                  <tr>
+                    <td id="exporttab_toolbar_leftbuttons"></td>
+                    <td id="exporttab_toolbar_rightbuttons" style="text-align: right;"></td>
+                  </tr>
+                </table>
+              </div>
+              <div id="exporttab_filename" class="subtoolbar">
+                Currently loaded: <span id="exporttab-loaded-file"></span>.
+              </div>
+            </div>
+            <h2>ModulePrefs</h2>
+            <table class="tabular" cellspacing="0" cellpadding="0">
+              <tbody>
+                <tr class="odd">
+                  <th>Title:</th>
+                  <td class="important"><input type="text" class="textinput input" id="export-moduleprefs-title"></input></td>
+                  <th>Title URL:</th>
+                  <td><input type="text" class="textinput input" id="export-moduleprefs-title-url"></input></td>
+                </tr>
+                <tr class="even">
+                  <th>Description:</th>
+                  <td colspan="3" class="important"><textarea class="textinput input" id="export-moduleprefs-description"></textarea></td>
+                </tr>
+                <tr class="odd important">
+                  <th>Author:</th>
+                  <td class="important"><input type="text" class="textinput input" id="export-moduleprefs-author"></input></td>
+                  <th>Author Email:</th>
+                  <td><input type="text" class="textinput input" id="export-moduleprefs-author-email"></input></td>
+                </tr>
+                <tr class="even">
+                  <th>Screenshot:</th>
+                  <td><input type="text" class="textinput input" id="export-moduleprefs-screenshot"></input></td>
+                  <th>Thumbnail:</th>
+                  <td><input type="text" class="textinput input" id="export-moduleprefs-thumbnail"></input></td>
+                </tr>
+                <tr class="odd">
+                  <th>Height:</th>
+                  <td><input type="text" class="textinput input" id="export-moduleprefs-height"></input></td>
+                  <th>Width:</th>
+                  <td><input type="text" class="textinput input" id="export-moduleprefs-width"></input></td>
+                </tr>
+              </tbody>
+            </table>
+            <h2>Features</h2>
+            <table id="features-table" class="features tabular" cellspacing="0" cellpadding="0">
+              <tbody>
+                <tr class="odd">
+                  <th>OpenSocial 0.8</th>
+                  <td>
+                    <input type="checkbox" id="export-features-opensocial-0.8" class="input" />
+                    <select id="export-features-opensocial-0.8-type" class="input" disabled="disabled">
+                      <option value="required">Required</option>
+                      <option value="optional">Optional</option>
+                    </select>
+                  </td>
+                  <th>OpenSocial 0.7</th>
+                  <td>
+                    <input type="checkbox" id="export-features-opensocial-0.7" class="input" />
+                    <select id="export-features-opensocial-0.7-type" class="input" disabled="disabled">
+                      <option value="required">Required</option>
+                      <option value="optional">Optional</option>
+                    </select>
+                  </td>
+                </tr>
+                <tr class="even">
+                  <th>PubSub</th>
+                  <td>
+                    <input type="checkbox" id="export-features-pubsub" class="input" />
+                    <select id="export-features-pubsub-type" class="input" disabled="disabled">
+                      <option value="required">Required</option>
+                      <option value="optional">Optional</option>
+                    </select>
+                  </td>
+                  <th>Views</th>
+                  <td>
+                    <input type="checkbox" id="export-features-views" class="input" />
+                    <select id="export-features-views-type" class="input" disabled="disabled">
+                      <option value="required">Required</option>
+                      <option value="optional">Optional</option>
+                    </select>
+                  </td>
+                </tr>
+                <tr class="odd">
+                  <th>Flash</th>
+                  <td>
+                    <input type="checkbox" id="export-features-flash" class="input" />
+                    <select id="export-features-flash-type" class="input" disabled="disabled">
+                      <option value="required">Required</option>
+                      <option value="optional">Optional</option>
+                    </select>
+                  </td>
+                  <th>Skins</th>
+                  <td>
+                    <input type="checkbox" id="export-features-skins" class="input" />
+                    <select id="export-features-skins-type" class="input" disabled="disabled">
+                      <option value="required">Required</option>
+                      <option value="optional">Optional</option>
+                    </select>
+                  </td>
+                </tr>
+                <tr class="even">
+                  <th>Dynamic Height</th>
+                  <td>
+                    <input type="checkbox" id="export-features-dynamic-height" class="input" />
+                    <select id="export-features-dynamic-height-type" class="input" disabled="disabled">
+                      <option value="required">Required</option>
+                      <option value="optional">Optional</option>
+                    </select>
+                  </td>
+                  <th>Set Title</th>
+                  <td>
+                    <input type="checkbox" id="export-features-settitle" class="input" />
+                    <select id="export-features-settitle-type" class="input" disabled="disabled">
+                      <option value="required">Required</option>
+                      <option value="optional">Optional</option>
+                    </select>
+                  </td>
+                </tr>
+                <tr class="odd">
+                  <th>Mini Message</th>
+                  <td>
+                    <input type="checkbox" id="export-features-minimessage" class="input" />
+                    <select id="export-features-minimessage-type" class="input" disabled="disabled">
+                      <option value="required">Required</option>
+                      <option value="optional">Optional</option>
+                    </select>
+                  </td>
+                  <th>Tabs</th>
+                  <td>
+                    <input type="checkbox" id="export-features-tabs" class="input" />
+                    <select id="export-features-tabs-type" class="input" disabled="disabled">
+                      <option value="required">Required</option>
+                      <option value="optional">Optional</option>
+                    </select>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <h2>Preload <button id="export-preload-button-add">Add a preload element</button></h2>
+            <table id="export-preload-table" class="preload tabular" cellspacing="0" cellpadding="0">
+              <thead>
+                <tr>
+                  <th style="width: 65%">URL</th>
+                  <th>Authentication</th>
+                  <th>Sign Owner?</th>
+                  <th>Sign Viewer?</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr id="export-preload-template" class="@class_name@">
+                  <td><input type="text" class="textinput input preload" id="export-preload-href-@entry_id@"></input></td>
+                  <td>
+                    <select id="export-preload-auth-@entry_id@" class="input preload">
+                      <option value="none">None</option>
+                      <option value="signed">Signed</option>
+                    </select>
+                  </td>
+                  <td><input type="checkbox" id="export-preload-sign-owner-@entry_id@" class="input preload"></input></td>
+                  <td><input type="checkbox" id="export-preload-sign-viewer-@entry_id@" class="input preload"></input></td>
+                </tr>
+              </tbody>
+            </table>
+            <h2>Content sections <button id="exporttab-view-button-add">Add a view</button></h2>
+            <div id="exporttab-view-tabs"></div>
+            <div id="exporttab-view-template">
+              <table class="tabular input view" cellspacing="0" cellpadding="0">
+                <tbody>
+                  <tr class="odd">
+                    <th>Name:</th>
+                    <td class="important">
+                      <input type="text" class="textinput view_name" value="@name@"/>
+                    </td>
+                    <td>
+                      <button class="view_delete">Delete this view</button>
+                    </td>
+                  </tr>
+                  <tr class="even">
+                    <th>HTML:</th>
+                    <td class="important" colspan="2">
+                      <p>You may place any HTML or JavaScript markup into this
+                      section. Press the</p>
+                      <p style="text-align: center;">
+                        <button class="view_copy">copy from code tab</button>
+                      </p>
+                      <p>button to load the current contents of the
+                        code tab into this textarea. The JavaScript will be
+                        inserted at your current cursor location, inside of a
+                        script tag.</p>
+                      <div class="view_html_wrap">
+                        <div class="view_html_background"></div>
+                        <textarea class="view_html"></textarea>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div id="exporttab-bottom-toolbar"></div>
+            <div id="exporttab-overlay-template">
+              <p><strong>Below is a gadget XML specification document representing
+                the information you entered in this form. Copy and paste
+                this output into an XML file and upload the file to your
+                web server.</strong></p>
+              <form target="exporttab-clipboard" method="POST" action="http://osda.appspot.com/clipboard">
+                <textarea wrap="off" readonly="readonly" id="exporttab-overlay-textbox"
+                  name="clipboard_data"></textarea>
+                <p>
+                  <input type="submit" id="exporttab-overlay-clipboard-button"value="Copy to Clipboard" />
+                  <button id="exporttab-overlay-button">Close</button>
+                </p>
+              </form>
+              <iframe id="exporttab-clipboard" name="exporttab-clipboard"></iframe>
+            </div>
+          <div id="exporttab_output"></div>
+        </div>
+        <div id="helptab" class="hidden" >
+          <div id="helptab_controls" class="controls">
+            <div id="helptab_toolbar" class="toolbar">&nbsp;</div>
+          </div>
+          <div id="helptab-context-message" class="notice">
+            <strong>Notice:</strong> You were shown this page because this is
+            the first time you have
+            loaded the OpenSocial Dev App. Next time this application loads,
+            you will be directed to the <strong>Code tab</strong>, but you may
+            access this page at any time by clicking the <strong>Help
+            tab</strong> above.
+          </div>
+          <div id="helptab-output"></div>
+        </div>
+      </div>
+      <script type="text/javascript">
+        document.write(unescape("%3Cscript src='http://www.google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+      </script>
+      <script type="text/javascript">
+        var pageTracker = _gat._getTracker("UA-5885628-1");
+        pageTracker._initData();
+        pageTracker._trackPageview();
+      </script>
+    ]]>
+  </Content>
+</Module>

@@ -1,0 +1,138 @@
+body{
+}
+.sztahanov{
+	background: #de0000 url(hu3shsla.gif) repeat top left;		
+	border-top: 8px solid #de0000;
+	border-left: 8px solid #de0000;
+	border-bottom: 8px solid #630000;
+	border-right: 8px solid #630000;
+	color: #fff;
+	font-weight: bold;
+	font-family: sans-serif;
+}
+.inner{
+	margin: 2px;	
+	background: transparent url(bg_sav.png) repeat-y 50% 0;
+	overflow: hidden;
+}
+.left{
+	width: 48%;
+	float: left;
+	clear: left;
+}
+.right{
+	width: 48%;
+	float: right;
+	clear: right;
+	margin-bottom: -1em;
+}
+a, a:visited {
+	color: #ead62b;
+}
+a:hover {
+	background-color:#EAD62B;
+	color: #550802;
+}
+fieldset{
+	border: 2px solid #fff;
+	margin: 5px 0px;
+}
+fieldset legend{
+	background-color:#ead62b;
+	color: #550802;
+	text-transform:uppercase;
+	padding: 2px;
+	letter-spacing: 0.2em;
+}
+button{
+	background-color:#B00000;
+	border-color:#D00000;
+	color:#EAD62B;
+	font-weight:bold;
+	text-transform:uppercase;
+}
+p.error{
+	color:red;
+	background-color:#fff;
+}
+.sum{
+	background-color:#ead62b;
+	color: #550802;
+}
+#friend_pager,
+#friends{
+	list-style-type: none;
+	margin: 0px;	
+	padding: 0px;
+}
+#friends li{
+	margin: 4px 0;
+	overflow: hidden;
+}
+.nofriends strong{
+	color: #ead62b;
+	font-size: 3em;
+	display: block;
+	text-align: center;
+	margin-bottom: 5px;
+}
+.person span.img{
+	float: left;
+	display: block;
+	width: 66px;
+	height: 66px;
+	margin-right: 4px;
+}
+.person a{
+	display: block;
+	text-transform: uppercase;
+}
+.person .stars{
+	display: block;
+	color: #ead62b;
+	font-size: 1.5em;
+	letter-spacing: 0.2em;
+}
+.person .hours{
+	display: block;
+	font-size: 0.7em;
+}
+.person img{
+	border: 1px solid #550802;
+}
+.copyright{
+	font-size: 0.7em;
+	margin: 0px;
+	clear: both;
+}
+
+.goto_canvas{
+	display: none;
+}
+
+.profile{
+	font-size: 0.9em;
+}
+.profile .right{
+	display: none;
+}
+.profile .left{
+	float: none;
+	width: auto;
+}
+.profile .inner{
+	background: none;
+}
+.profile form{
+	margin-bottom: 4px;
+}
+.profile fieldset{
+	border: 0px;
+	padding: 0px 5px;
+}
+.profile fieldset p{
+	margin: 6px 0px;
+}
+.profile .goto_canvas{
+	display: block;
+}

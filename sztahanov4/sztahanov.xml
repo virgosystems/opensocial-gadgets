@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+	<ModulePrefs title="Sztahanov v4"
+		author="Gipsz Jakab"
+		author_email="noreply@iwiw.hu">
+		<Require feature="opensocial-0.8" />
+	</ModulePrefs>
+  	<Content type="html">
+	<![CDATA[
+
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/prototype/1.6.0.2/prototype.js"></script>
+
+<script type="text/javascript">
+var sztahanov = function() {
+	var hours = 0;
+
+	var logWork = function (event) {
+		Event.stop(event);
+		var hoursLogged = + $F('hours');
+		if(hoursLogged > 0) {
+			$('hours').value = '';
+			hours += hoursLogged;
+			$('sum').update(hours + ' órát');
+
+			var req = opensocial.newDataRequest();
+			req.add(req.newUpdatePersonAppDataRequest("VIEWER", 'workHours', {hours:hours}));
+			req.send();
+		}
+	}
+
+	var load = function(data) {
+		var viewer = data.get('viewer').getData();
+		var owner = data.get('owner').getData();
+
+		var viewerWorkHours = extractSztahanovData(data.get('viewerSztahanovData').getData(),viewer);
+		if(viewerWorkHours) {
+			hours = viewerWorkHours;
+			$('sum').update(hours + ' órát');
+		}
+
+		if(! viewer.isOwner()) {
+			//ha más alkalmazását nézem, megjelenítjük az owner összalepátolt óráit is
+			var ownerWorkHours = extractSztahanovData(data.get('ownerSztahanovData').getData(),owner);
+			if(ownerWorkHours) {
+				$('ownerHours').update(ownerWorkHours + ' órát');
+			}
+			$('ownerName').update(owner.getDisplayName());
+		} else {
+			//ha a sajátomat nézem, az egész eltüntethető
+			$('ownerData').hide();	
+		}		
+
+		//feldolgozzuk az ismerős listát
+		var friendsHTML = [];
+		var friends = data.get('ownerFriends').getData();
+		var friendsSztahanovData = data.get('ownerFriendsSztahanovData').getData()
+
+		friends.each(function(person) {
+			var workHours = extractSztahanovData(friendsSztahanovData, person);
+			friendsHTML.push(
+				'<li>'
+				+person.getDisplayName()
+				+' <em>' + (workHours ? workHours + ' órát lapátolt' : 'veszélyes munkakerülő')+'</em>'
+				+'</li>');
+		})
+
+		$('friends').update(friendsHTML.join(''));
+
+	}
+
+	var extractSztahanovData = function(data, person) {
+		if(data[person.getId()]) {
+			var workHours = gadgets.json.parse(gadgets.util.unescapeString(data[person.getId()]['workHours']));
+			return workHours.hours;
+		}
+	}
+
+	return {
+		init: function() {
+			$('logWork').observe('submit',logWork);
+			var viewer = opensocial.newIdSpec({ "userId" : "VIEWER" });
+			var owner = opensocial.newIdSpec({ "userId" : "OWNER" });
+			var req = opensocial.newDataRequest();
+			req.add(req.newFetchPersonRequest(opensocial.IdSpec.PersonId.VIEWER), 'viewer');
+			req.add(req.newFetchPersonRequest(opensocial.IdSpec.PersonId.OWNER), 'owner');
+			req.add(req.newFetchPersonAppDataRequest(viewer, 'workHours'), 'viewerSztahanovData');
+			req.add(req.newFetchPersonAppDataRequest(owner, 'workHours'), 'ownerSztahanovData');
+			var friends_params = {};
+			//legfeljebb 5 ismerőst kérünk
+			friends_params[opensocial.DataRequest.PeopleRequestFields.MAX] = 5;
+			//név szerint rendezve
+			friends_params[opensocial.DataRequest.PeopleRequestFields.SORT_ORDER] = opensocial.DataRequest.SortOrder.NAME;
+			//csak azokat, akiknek telepítve van az alkalmazás
+			friends_params[opensocial.DataRequest.PeopleRequestFields.FILTER] =	opensocial.DataRequest.FilterType.HAS_APP;
+			var ownerFriends = opensocial.newIdSpec({ "userId" : "OWNER", "groupId" : "FRIENDS" });
+			//ismerősök, es a hozzájuk tartozó alkalmazás-adatok
+			req.add(req.newFetchPeopleRequest(ownerFriends, friends_params), 'ownerFriends');
+			req.add(req.newFetchPersonAppDataRequest(ownerFriends, 'workHours', friends_params), 'ownerFriendsSztahanovData');
+			req.send(load);
+		}
+
+	}
+}();
+gadgets.util.registerOnLoadHandler(sztahanov.init);
+</script>
+<form id="logWork">
+	<p id="ownerData">
+		<label><span id="ownerName"></span> ennyit lapátolt:</label>
+		<strong id="ownerHours">semennyit</strong>
+	</p>
+	<p>
+		<label>Eddig ennyit lapátoltál:</label>
+		<strong id="sum">semennyit</strong>
+	</p>
+	<p>
+		<label>Ma ennyit:</label>
+		<input type="text" size="2" id="hours"/> órát
+		<button type="submit">Mehet</button>
+	</p>
+</form>
+<ul id="friends">
+</ul>
+	]]>
+	</Content>
+</Module>
+

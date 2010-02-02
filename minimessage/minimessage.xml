@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+  <ModulePrefs title="minimessage test" 
+		author="Gipsz Jakab"
+		author_email="noreply@iwiw.hu">
+		<Require feature="opensocial-0.8" />
+		<Require feature="minimessage" />
+  </ModulePrefs>
+  <Content type="html">
+	 <![CDATA[
+		<!--  -->
+		<script type="text/javascript">
+			var mm = function() {
+				var msg = new gadgets.MiniMessage();
+				var cmsg;
+				return {
+					dismissable: function() {
+						cmsg = msg.createDismissibleMessage('hello world');
+					},
+					static: function() {
+						cmsg = msg.createStaticMessage('hello world!');
+					},
+					dismiss: function() {
+						msg.dismissMessage(cmsg);
+					}
+				}
+			}();
+			//gadgets.util.registerOnLoadHandler(mm.init);
+		</script>
+
+		<button type="button" onclick="mm.dismissable()">dismissableMessage</button>
+		<button type="button" onclick="mm.static()">staticmessage</button>
+		<button type="button" onclick="mm.dismiss()">dismiss</button>
+    ]]>
+  </Content>
+</Module>
+

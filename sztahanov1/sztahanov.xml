@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+	<ModulePrefs title="Sztahanov v1"
+		author="Gipsz Jakab"
+		author_email="noreply@iwiw.hu">
+	</ModulePrefs>
+  	<Content type="html">
+	<![CDATA[
+
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/prototype/1.6.0.2/prototype.js"></script>
+
+<script tpe="text/javascript">
+var sztahanov = function() {
+	var hours = 0;
+
+	var logWork = function (event) {
+		Event.stop(event);
+		var hoursLogged = + $F('hours');
+		if(hoursLogged > 0) {
+			$('hours').value = '';
+			hours += hoursLogged;
+			$('sum').update(hours + ' órát');
+		}
+	}
+
+	return {
+		init: function() {
+			$('logWork').observe('submit',logWork);
+		}
+
+	}
+}();
+gadgets.util.registerOnLoadHandler(sztahanov.init);
+</script>
+<form id="logWork">
+	<p>
+		<label>Eddig ennyit lapátoltál:</label>
+		<strong id="sum" class="sum">semennyit</strong>
+	</p>
+	<p>
+		<label>Ma ennyit:</label>
+		<input type="text" size="2" id="hours"/> órát
+		<button type="submit" id="saveHours">Mehet</button>
+	</p>
+</form>
+	]]>
+	</Content>
+</Module>
+

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+  <ModulePrefs title="makeRequest test" 
+		author="Gipsz Jakab"
+		author_email="noreply@iwiw.hu">
+		<Require feature="opensocial-0.8" />
+  </ModulePrefs>
+  <Content type="html">
+	 <![CDATA[
+		<!--  -->
+		<script type="text/javascript">
+			var makerequest = function() {
+				var load = function(data) {
+					document.getElementById('target').innerHTML = data.text;
+				}
+
+				return {
+					init: function() {
+						gadgets.io.makeRequest('http://gadget.virgosystems.hu/~mrc/makerequest/data.txt',load);
+					}
+				}
+			}();
+			gadgets.util.registerOnLoadHandler(makerequest.init);
+		</script>
+		<p>
+			Itt alább azt kell látnod, hogy "hello world":
+		</p>
+		<p id="target">
+		</p>
+      
+    ]]>
+  </Content>
+</Module>
+
