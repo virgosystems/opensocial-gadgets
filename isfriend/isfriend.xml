@@ -7,7 +7,7 @@
 	</ModulePrefs>
   <Content type="html">
 		<![CDATA[
-<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/prototype/1.6.0.3/prototype.js"></script>
+<script type="text/javascript" src="http://prototypejs.org/assets/2010/5/13/prototype.js"></script>
 
 <script type="text/javascript">
 var isfriend = function() {
